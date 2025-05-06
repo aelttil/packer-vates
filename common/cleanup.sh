@@ -5,9 +5,9 @@ echo "Nettoyage du système et configuration DHCP..."
 
 # Configuration de l'interface réseau en DHCP
 echo "Configuration de l'interface réseau en DHCP..."
-cat > /etc/network/interfaces.d/eth0 << EOF
-auto eth0
-iface eth0 inet dhcp
+cat > /etc/network/interfaces.d/enX0 << EOF
+auto enX0
+iface enX0 inet dhcp
 EOF
 
 # Arrêt des services pour le nettoyage
