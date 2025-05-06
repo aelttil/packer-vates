@@ -52,8 +52,6 @@ source "xenserver-iso" "debian12" {
   remote_username = var.remote_username
 
   http_directory = "http"
-  ip_getter = "none"
-  ssh_host = "10.0.0.30"
 
   boot_command =  [
         "<wait><wait><wait><esc><wait><wait><wait>",
