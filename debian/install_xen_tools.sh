@@ -2,8 +2,11 @@
 set -e
 
 echo "Installation des outils Xen Guest Agent..."
+# Ajout du dépôt officiel
+echo "deb [trusted=yes] https://gitlab.com/api/v4/projects/xen-project%252Fxen-guest-agent/packages/generic/deb-amd64/ release/" > /etc/apt/sources.list.d/xen-guest-agent.list
+
+# Mise à jour des dépôts et installation du paquet
 apt-get update
-wget https://gitlab.com/xen-project/xen-guest-agent/-/jobs/6041608357/artifacts/raw/target/release/xen-guest-agent_0.4.0_amd64.deb
-RUNLEVEL=1 dpkg -i xen-guest-agent_0.4.0_amd64.deb
-rm xen-guest-agent_0.4.0_amd64.deb
+apt-get install -y xen-guest-agent
+
 echo "Installation des outils Xen Guest Agent terminée."
