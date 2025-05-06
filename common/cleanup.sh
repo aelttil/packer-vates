@@ -10,17 +10,6 @@ auto enX0
 iface enX0 inet dhcp
 EOF
 
-# Arrêt des services pour le nettoyage
-service rsyslog stop
-
-# Nettoyage des journaux d'audit
-if [ -f /var/log/wtmp ]; then
-    truncate -s0 /var/log/wtmp
-fi
-if [ -f /var/log/lastlog ]; then
-    truncate -s0 /var/log/lastlog
-fi
-
 # Nettoyage des répertoires temporaires
 rm -rf /tmp/*
 rm -rf /var/tmp/*

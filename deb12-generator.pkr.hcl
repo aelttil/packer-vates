@@ -123,7 +123,6 @@ build {
       "sudo /tmp/update_system.sh",
       "sudo /tmp/harden_ssh.sh",
       "sudo /tmp/harden_system.sh",
-      "sudo /tmp/disable_services.sh",
       
       # Scripts spécifiques à Debian
       "sudo /tmp/install_xen_tools.sh",
