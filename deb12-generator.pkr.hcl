@@ -70,7 +70,6 @@ source "xenserver-iso" "debian12" {
         "netcfg/get_gateway=10.0.0.254 ",
         "netcfg/get_nameservers=8.8.8.8 ",
         "netcfg/confirm_static=true ",
-        
         "vga=788 noprompt quiet--- <enter>"
   ]
 
@@ -92,10 +91,49 @@ source "xenserver-iso" "debian12" {
   ssh_handshake_attempts  = 10000
 
   output_directory = "packer-debian-12"
-  keep_vm          = "never"
+
+  # keep_vm = "on-success"__: Conserve la VM si le build réussit (idéal pour les tests)
+  # keep_vm = "on-failure"__: Conserve la VM uniquement si le build échoue (utile pour déboguer)
+  # keep_vm = "always"__: Conserve toujours la VM, quel que soit le résultat du build
+  keep_vm          = "always"
   format = "xva_compressed"
 }
 
 build {
   sources = ["xenserver-iso.debian12"]
+
+  # Transfert des scripts communs
+  provisioner "file" {
+    source      = "common/"
+    destination = "/tmp/common/"
+  }
+
+  # Transfert des scripts spécifiques à Debian
+  provisioner "file" {
+    source      = "debian/"
+    destination = "/tmp/debian/"
+  }
+
+  # Exécution des scripts
+  provisioner "shell" {
+    inline = [
+      "chmod +x /tmp/common/*.sh /tmp/debian/*.sh",
+      
+      # Scripts communs
+      "sudo /tmp/common/update_system.sh",
+      "sudo /tmp/common/harden_ssh.sh",
+      "sudo /tmp/common/harden_system.sh",
+      "sudo /tmp/common/disable_services.sh",
+      
+      # Scripts spécifiques à Debian
+      "sudo /tmp/debian/install_xen_tools.sh",
+      "sudo /tmp/debian/debian_specific.sh",
+      
+      # Nettoyage final (commun)
+      "sudo /tmp/common/cleanup.sh",
+      
+      # Suppression des scripts
+      "rm -rf /tmp/common /tmp/debian"
+    ]
+  }
 }
