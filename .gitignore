@@ -1,0 +1,16 @@
+# Packer
+*.auto.pkrvars.hcl
+*.pkrvars.hcl
+packer_cache/
+output-*/
+packer-debian-12/
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
