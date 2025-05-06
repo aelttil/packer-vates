@@ -75,8 +75,8 @@ source "xenserver-iso" "debian12" {
 
   # Change this to match the ISO of ubuntu you are using in the iso_url variable
   clone_template = "Generic Linux BIOS"
-  vm_name        = "Debian 12 template"
-  vm_description = "My first template with packer"
+  vm_name        = "debian-12"
+  vm_description = "Template Debian 12 (12.10)"
   vcpus_max	 = 4
   vcpus_atstartup = 2
   vm_memory      = 4096 #MB
@@ -102,38 +102,38 @@ source "xenserver-iso" "debian12" {
 build {
   sources = ["xenserver-iso.debian12"]
 
-  # Transfert des scripts communs
+  # Transfert des scripts communs - CORRECTION
   provisioner "file" {
     source      = "common/"
-    destination = "/tmp/common/"
+    destination = "/tmp/"
   }
 
-  # Transfert des scripts spécifiques à Debian
+  # Transfert des scripts spécifiques à Debian - CORRECTION
   provisioner "file" {
     source      = "debian/"
-    destination = "/tmp/debian/"
+    destination = "/tmp/"
   }
 
   # Exécution des scripts
   provisioner "shell" {
     inline = [
-      "chmod +x /tmp/common/*.sh /tmp/debian/*.sh",
+      "chmod +x /tmp/*.sh",
       
       # Scripts communs
-      "sudo /tmp/common/update_system.sh",
-      "sudo /tmp/common/harden_ssh.sh",
-      "sudo /tmp/common/harden_system.sh",
-      "sudo /tmp/common/disable_services.sh",
+      "sudo /tmp/update_system.sh",
+      "sudo /tmp/harden_ssh.sh",
+      "sudo /tmp/harden_system.sh",
+      "sudo /tmp/disable_services.sh",
       
       # Scripts spécifiques à Debian
-      "sudo /tmp/debian/install_xen_tools.sh",
-      "sudo /tmp/debian/debian_specific.sh",
+      "sudo /tmp/install_xen_tools.sh",
+      "sudo /tmp/debian_specific.sh",
       
       # Nettoyage final (commun)
-      "sudo /tmp/common/cleanup.sh",
+      "sudo /tmp/cleanup.sh",
       
       # Suppression des scripts
-      "rm -rf /tmp/common /tmp/debian"
+      "rm -f /tmp/*.sh"
     ]
   }
 }
