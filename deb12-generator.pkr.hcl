@@ -118,8 +118,8 @@ build {
   provisioner "shell" {
     inline = [
       "chmod +x /tmp/*.sh",
-      "sudo touch /alt.txt"
-      
+      "sudo touch /alt.txt",
+
       # Scripts communs
       "sudo /tmp/update_system.sh",
       "sudo /tmp/harden_ssh.sh",
