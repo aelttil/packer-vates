@@ -47,7 +47,7 @@ variable "network_names" {
 
 source "xenserver-iso" "debian12" {
   iso_checksum      = "cb089def0684fd93c9c2fbe45fd16ecc809c949a6fd0c91ee199faefe7d4b82b64658a264a13109d59f1a40ac3080be2f7bd3d8bf3e9cdf509add6d72576a79b"
-  iso_url = "https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.10.0-amd64-netinst.iso"
+  iso_url = "https://reks2ee2b1.s3.fr1.cloud-temple.com/packer-vates/ISO/debian-12.10.0-amd64-netinst.iso" #"https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.10.0-amd64-netinst.iso"
 
   sr_iso_name    = var.sr_iso_name
   sr_name        = var.sr_name

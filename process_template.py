@@ -257,6 +257,15 @@ def upload_to_s3(file_path, object_name):
     secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     bucket = os.getenv('S3_BUCKET')
     endpoint_url = os.getenv('S3_ENDPOINT_URL')
+    make_public = os.getenv('S3_MAKE_PUBLIC', 'false').lower() == 'true'
+    
+    # Vérifier que les variables nécessaires sont définies
+    required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET']
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    if missing_vars:
+        print(f"Erreur: Les variables suivantes sont manquantes dans le fichier .env: {', '.join(missing_vars)}")
+        sys.exit(1)
     
     # Configuration pour utiliser la signature S3 au lieu de SigV4
     s3_config = Config(
@@ -274,7 +283,27 @@ def upload_to_s3(file_path, object_name):
     )
     
     try:
+        # Vérifier si le bucket existe
+        try:
+            s3_client.head_bucket(Bucket=bucket)
+        except Exception as e:
+            print(f"Erreur: Le bucket {bucket} n'existe pas ou n'est pas accessible: {e}")
+            sys.exit(1)
+        
+        # Télécharger le fichier
         s3_client.upload_file(file_path, bucket, object_name)
+        
+        # Configurer l'accès public en lecture (si demandé)
+        if make_public:
+            try:
+                s3_client.put_object_acl(
+                    Bucket=bucket,
+                    Key=object_name,
+                    ACL='public-read'
+                )
+            except Exception as e:
+                print(f"Avertissement: Impossible de configurer l'accès public: {e}")
+                print(f"Le fichier a été téléchargé mais n'est pas accessible publiquement.")
         
         # Générer l'URL publique
         if endpoint_url:
