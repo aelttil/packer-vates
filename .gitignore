@@ -15,6 +15,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# ISO
+ISO/*
+
 
 # Vars and python env
 .env
