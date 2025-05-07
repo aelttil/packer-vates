@@ -134,9 +134,15 @@ Le workflow sauvegarde les artefacts suivants dans un dossier local `artifacts` 
 - Fichier JSON de métadonnées
 - Fichier log de la construction
 
-Le fichier XVA est téléchargé uniquement vers S3 en raison de sa taille.
+Le script `process_template.py` télécharge automatiquement tous les fichiers vers S3 dans un dossier organisé par template et par timestamp:
 
-> **Note**: Les artefacts sont sauvegardés localement plutôt que téléchargés vers GitHub pour éviter les problèmes de connectivité avec les actions GitHub.
+- `templates/{os}{version}/{timestamp}/{os}{version}.xva`: Fichier XVA
+- `templates/{os}{version}/{timestamp}/metadata.json`: Fichier JSON de métadonnées
+- `templates/{os}{version}/{timestamp}/build.log`: Fichier log de la construction
+
+Cette organisation permet de retrouver facilement tous les fichiers liés à un build spécifique dans un même dossier.
+
+> **Note**: Les artefacts sont sauvegardés localement plutôt que téléchargés vers GitHub pour éviter les problèmes de connectivité avec les actions GitHub. Le téléchargement vers S3 est géré directement par le script `process_template.py`.
 
 ## Ajout d'un nouveau template
 

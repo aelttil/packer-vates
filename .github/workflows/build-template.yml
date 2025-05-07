@@ -72,3 +72,4 @@ jobs:
           cp metadata-*.json artifacts/ || true
           cp packer-build-*.log artifacts/ || true
           echo "Les artefacts ont été sauvegardés dans le dossier 'artifacts'"
+          echo "Note: Les fichiers ont déjà été téléchargés vers S3 par le script process_template.py"

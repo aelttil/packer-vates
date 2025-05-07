@@ -127,13 +127,30 @@ def determine_os_info(template_file, hcl_data):
         return os_type, os_version
     
     # Méthode 2: Extraction à partir de l'URL ISO
-    source_data = hcl_data.get("source", {}).get("xenserver-iso", {})
-    for source_name, source_config in source_data.items():
-        iso_url = source_config.get("iso_url", "")
-        if iso_url:
-            os_type, os_version = extract_os_info_from_iso_url(iso_url)
-            if os_version != "unknown":
-                return os_type, os_version
+    try:
+        if isinstance(hcl_data, dict):
+            source_data = hcl_data.get("source", {}).get("xenserver-iso", {})
+            for source_name, source_config in source_data.items():
+                iso_url = source_config.get("iso_url", "")
+                if iso_url:
+                    os_type, os_version = extract_os_info_from_iso_url(iso_url)
+                    if os_version != "unknown":
+                        return os_type, os_version
+        elif isinstance(hcl_data, list):
+            # Parcourir la liste pour trouver les informations de source
+            for item in hcl_data:
+                if isinstance(item, dict) and "source" in item:
+                    source_data = item.get("source", {})
+                    if "xenserver-iso" in source_data:
+                        xenserver_data = source_data.get("xenserver-iso", {})
+                        for key, value in xenserver_data.items():
+                            iso_url = value.get("iso_url", "")
+                            if iso_url:
+                                os_type, os_version = extract_os_info_from_iso_url(iso_url)
+                                if os_version != "unknown":
+                                    return os_type, os_version
+    except Exception as e:
+        print(f"Avertissement: Impossible d'extraire les informations OS à partir de l'URL ISO: {e}")
     
     # Méthode 3: Extraction à partir du chemin
     os_type, os_version = extract_os_info_from_path(template_file)
@@ -172,22 +189,39 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
     # Déterminer dynamiquement le système d'exploitation et la version
     os_type, os_version = determine_os_info(template_file, hcl_data)
     
+    # Valeurs par défaut
+    vm_name = f"{os_type}-{os_version}"
+    vm_description = f"{os_type.capitalize()} {os_version} Template"
+    vm_tags = [os_type, f"{os_type}{os_version}", "cloud-init"]
+    
     # Extraction des informations pertinentes du fichier HCL
-    source_data = hcl_data.get("source", {}).get("xenserver-iso", {})
-    
-    # Trouver la première source (pour debian12 ou autre)
-    first_source_key = next(iter(source_data.keys()), None)
-    if first_source_key:
-        source_config = source_data[first_source_key]
-    else:
-        source_config = {}
-    
-    # Extraction des valeurs
-    vm_name = source_config.get("vm_name", f"{os_type}-{os_version}")
-    vm_description = source_config.get("vm_description", f"{os_type.capitalize()} {os_version} Template")
-    
-    # Extraction des tags de la VM
-    vm_tags = source_config.get("vm_tags", [os_type, f"{os_type}{os_version}", "cloud-init"])
+    try:
+        if isinstance(hcl_data, dict):
+            source_data = hcl_data.get("source", {}).get("xenserver-iso", {})
+            first_source_key = next(iter(source_data.keys()), None)
+            if first_source_key:
+                source_config = source_data[first_source_key]
+                vm_name = source_config.get("vm_name", vm_name)
+                vm_description = source_config.get("vm_description", vm_description)
+                if "vm_tags" in source_config:
+                    vm_tags = source_config.get("vm_tags")
+        elif isinstance(hcl_data, list):
+            # Parcourir la liste pour trouver les informations de source
+            for item in hcl_data:
+                if isinstance(item, dict) and "source" in item:
+                    source_data = item.get("source", {})
+                    if "xenserver-iso" in source_data:
+                        xenserver_data = source_data.get("xenserver-iso", {})
+                        for key, value in xenserver_data.items():
+                            if "vm_name" in value:
+                                vm_name = value.get("vm_name")
+                            if "vm_description" in value:
+                                vm_description = value.get("vm_description")
+                            if "vm_tags" in value:
+                                vm_tags = value.get("vm_tags")
+    except Exception as e:
+        print(f"Avertissement: Impossible d'extraire les informations de la VM à partir du fichier HCL: {e}")
+        print(f"Utilisation des valeurs par défaut")
     
     # Construction du JSON de métadonnées
     metadata = {
@@ -280,28 +314,48 @@ def main():
         log_content = f.read()
     
     # Déterminer le répertoire de sortie à partir du fichier HCL
-    source_data = hcl_data.get("source", {}).get("xenserver-iso", {})
-    first_source_key = next(iter(source_data.keys()), None)
-    if first_source_key:
-        output_dir = source_data[first_source_key].get("output_directory", f"packer-template-{os_type}-{os_version}")
-    else:
-        output_dir = f"packer-template-{os_type}-{os_version}"
+    # Gérer le cas où hcl_data est une liste ou un dictionnaire
+    output_dir = f"packer-template-{os_type}-{os_version}"
+    
+    try:
+        if isinstance(hcl_data, dict):
+            source_data = hcl_data.get("source", {}).get("xenserver-iso", {})
+            first_source_key = next(iter(source_data.keys()), None)
+            if first_source_key:
+                output_dir = source_data[first_source_key].get("output_directory", output_dir)
+        elif isinstance(hcl_data, list):
+            # Parcourir la liste pour trouver les informations de source
+            for item in hcl_data:
+                if isinstance(item, dict) and "source" in item:
+                    source_data = item.get("source", {})
+                    if "xenserver-iso" in source_data:
+                        xenserver_data = source_data.get("xenserver-iso", {})
+                        for key, value in xenserver_data.items():
+                            if "output_directory" in value:
+                                output_dir = value.get("output_directory")
+                                break
+    except Exception as e:
+        print(f"Avertissement: Impossible de déterminer le répertoire de sortie à partir du fichier HCL: {e}")
+        print(f"Utilisation du répertoire par défaut: {output_dir}")
     
     xva_file = find_output_file(log_content, output_dir)
     
+    # Créer un dossier pour ce build
+    build_folder = f"templates/{os_type}{os_version}/{timestamp}"
+    
     # Étape 4: Télécharger le fichier XVA vers S3
-    s3_object_name = f"templates/{os_type}{os_version}/{os_type}{os_version}-{timestamp}.xva"
+    s3_object_name = f"{build_folder}/{os_type}{os_version}.xva"
     s3_url = upload_to_s3(xva_file, s3_object_name)
     
     # Étape 5: Générer le fichier de métadonnées
     metadata_file = generate_metadata(template_file, hcl_data, xva_file, s3_url)
     
     # Étape 6: Télécharger le fichier de métadonnées vers S3
-    metadata_s3_object = f"templates/{os_type}{os_version}/metadata-{timestamp}.json"
+    metadata_s3_object = f"{build_folder}/metadata.json"
     metadata_url = upload_to_s3(metadata_file, metadata_s3_object)
     
     # Étape 7: Télécharger le fichier log vers S3
-    log_s3_object = f"logs/{os_type}{os_version}-build-{timestamp}.log"
+    log_s3_object = f"{build_folder}/build.log"
     log_url = upload_to_s3(log_file, log_s3_object)
     
     print("\n=== Processus terminé avec succès ===")
