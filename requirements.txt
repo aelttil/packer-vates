@@ -1,0 +1,3 @@
+# Dépendances pour le script d'upload S3
+boto3>=1.28.0
+python-dotenv>=1.0.0
