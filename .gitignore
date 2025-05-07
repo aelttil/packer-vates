@@ -14,3 +14,8 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+
+# Vars and python env
+.env
+venv
