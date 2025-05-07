@@ -1,0 +1,62 @@
+name: Build and Upload Template
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'packer/**'
+      - '.github/workflows/build-template.yml'
+  pull_request:
+    branches: [ main ]
+  # Permettre le déclenchement manuel
+  workflow_dispatch:
+    inputs:
+      template:
+        description: 'Template à construire (debian12, ubuntu22, etc.)'
+        required: true
+        default: 'debian12'
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Create credentials file
+        run: |
+          cat > credentials.pkrvars.hcl << EOF
+          remote_host = "${{ secrets.REMOTE_HOST }}"
+          remote_username = "root"
+          remote_password = "${{ secrets.REMOTE_PASSWORD }}"
+          sr_iso_name = "ISO"
+          sr_name = "${{ secrets.SR_NAME }}"
+          network_names = ["${{ secrets.NETWORK_NAME }}"]
+          EOF
+
+      - name: Create .env file for S3
+        run: |
+          cat > .env << EOF
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET=${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL=${{ secrets.S3_ENDPOINT_URL }}
+          EOF
+
+      - name: Process template
+        run: |
+          TEMPLATE="${{ github.event.inputs.template || 'debian12' }}"
+          python process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: template-artifacts
+          path: |
+            metadata-*.json
+            packer-build-*.log
