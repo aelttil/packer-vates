@@ -55,6 +55,12 @@ jobs:
           S3_ENDPOINT_URL=${{ secrets.S3_ENDPOINT_URL }}
           EOF
 
+      - name: Initialize Packer
+        run: |
+          cd packer/debian
+          packer init debian12.pkr.hcl
+          cd ../..
+
       - name: Process template
         run: |
           TEMPLATE="${{ github.event.inputs.template || 'debian12' }}"

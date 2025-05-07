@@ -45,6 +45,12 @@ if [ ! -f ".env" ]; then
     fi
 fi
 
+# Initialiser Packer
+echo "Initialisation de Packer..."
+TEMPLATE_DIR=$(dirname "$TEMPLATE_FILE")
+TEMPLATE_NAME=$(basename "$TEMPLATE_FILE")
+(cd "$TEMPLATE_DIR" && packer init "$TEMPLATE_NAME")
+
 # Exécuter le script Python
 echo "Démarrage de la construction du template $TEMPLATE_FILE..."
 python3 process_template.py "$TEMPLATE_FILE" "$VAR_FILE"

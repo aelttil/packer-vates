@@ -17,6 +17,7 @@ Le script `process_template.py` automatise l'ensemble du processus de constructi
 - Python 3.6+
 - Packer installé et accessible dans le PATH
 - Dépendances Python installées: `python3 -m pip install -r requirements.txt`
+- Plugins Packer installés: `packer init packer/debian/debian12.pkr.hcl`
 - Fichier `.env` configuré pour l'accès S3
 
 ### Utilisation
@@ -42,6 +43,7 @@ python3 process_template.py <template_file> <var_file>
 # Exemple avec Debian 12
 python3 process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
 ```
+
 
 ### Configuration S3
 
@@ -111,6 +113,10 @@ Pour configurer un runner auto-hébergé:
    ```bash
    sudo apt-get update
    sudo apt-get install -y python3 python3-pip packer
+   
+   # Installer les plugins Packer nécessaires
+   cd /chemin/vers/le/projet
+   packer init packer/debian/debian12.pkr.hcl
    ```
 
 ### Déclenchement du workflow
