@@ -57,7 +57,7 @@ source "xenserver-iso" "debian12" {
   remote_password = var.remote_password
   remote_username = var.remote_username
 
-  http_directory = "debian/http"
+  http_directory = "packer/debian/http"
 
   boot_command =  [
         "<wait><wait><wait><esc><wait><wait><wait>",
