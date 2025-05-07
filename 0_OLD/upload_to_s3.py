@@ -53,7 +53,7 @@ class S3Client:
             aws_secret_access_key=self.secret_key,
             endpoint_url=self.endpoint_url,
             config=s3_config,
-            verify=True  # Mettre à False si nécessaire pour les environnements de test
+            verify=False  # Mettre à False si nécessaire pour les environnements de test
         )
     
     def upload_file(self, local_file, bucket, s3_file, public=False):
@@ -187,6 +187,7 @@ def main():
     secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
     bucket = os.getenv('S3_BUCKET')
     endpoint_url = os.getenv('S3_ENDPOINT_URL')
+    make_public = os.getenv('S3_MAKE_PUBLIC', 'true').lower() == 'true'
     
     # Vérifier que les variables nécessaires sont définies
     required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET']
@@ -197,27 +198,67 @@ def main():
         sys.exit(1)
     
     try:
-
-        # Créer le client S3
-        s3_client = S3Client(
-            access_key=access_key,
-            secret_key=secret_key,
-            endpoint_url=endpoint_url,
-            logger_level=logging.INFO
-        )
-
-        # Télécharger le fichier
-        success = s3_client.upload_file(
-            local_file=file_path,
-            bucket=bucket,
-            s3_file=object_name,
-            public=True
+        # Configuration pour forcer le path style avec signature S3 standard
+        s3_config = Config(
+            s3={
+                'addressing_style': 'path',
+                'signature_version': 's3',  # Utiliser la signature S3 standard au lieu de SigV4
+                'payload_signing_enabled': False  # Désactiver la signature du payload
+            },
+            retries={
+                'max_attempts': 10,
+                'mode': 'adaptive'
+            }
         )
         
-        sys.exit(0 if success else 1)
+        # Utiliser l'URL générique de l'endpoint S3
+        generic_endpoint_url = "https://s3.fr1.cloud-temple.com"
+        
+        # Créer le client S3 directement
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            endpoint_url=generic_endpoint_url,
+            config=s3_config,
+            verify=False  # Désactiver la vérification SSL
+        )
+        
+        # Télécharger le fichier en une seule partie
+        logger.info(f"Téléchargement de {file_path} vers {bucket}/{object_name}...")
+        
+        # Lire le fichier en mémoire et le télécharger en une seule partie
+        # Note: Cette approche n'est pas recommandée pour les fichiers volumineux
+        # mais peut fonctionner pour des fichiers plus petits
+        with open(file_path, 'rb') as data:
+            s3_client.put_object(
+                Bucket=bucket,
+                Key=object_name,
+                Body=data.read(),
+                ContentType='application/octet-stream',
+                StorageClass='STANDARD'
+            )
+        
+        # Configurer l'accès public si demandé
+        if make_public:
+            logger.info(f"Configuration de l'accès public en lecture pour {object_name}...")
+            s3_client.put_object_acl(
+                Bucket=bucket,
+                Key=object_name,
+                ACL='public-read'
+            )
+            
+            # Générer et afficher l'URL publique
+            public_url = f"{generic_endpoint_url}/{bucket}/{object_name}"
+            logger.info(f"Fichier configuré en accès public.")
+            logger.info(f"URL publique: {public_url}")
+        else:
+            logger.info(f"Fichier téléchargé avec succès.")
+        
+        sys.exit(0)
         
     except Exception as e:
-        logger.error(f"Erreur: {e}")
+        logger.error(f"Erreur inattendue: {e}")
         sys.exit(1)
 
 
