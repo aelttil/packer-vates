@@ -5,8 +5,18 @@ echo "Nettoyage du système et configuration DHCP..."
 
 # Configuration de l'interface réseau en DHCP
 echo "Configuration de l'interface réseau en DHCP..."
-cat > /etc/network/interfaces.d/enX0 << EOF
-auto enX0
+cat > /etc/network/interfaces << EOF
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug enX0
 iface enX0 inet dhcp
 EOF
 
