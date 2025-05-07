@@ -118,6 +118,7 @@ build {
   provisioner "shell" {
     inline = [
       "chmod +x /tmp/*.sh",
+      "sudo touch /alt.txt"
       
       # Scripts communs
       "sudo /tmp/update_system.sh",
@@ -132,7 +133,7 @@ build {
       "sudo /tmp/cleanup.sh",
       
       # Suppression des scripts
-      "rm -f /tmp/*.sh"
+      # "rm -f /tmp/*.sh"
     ]
   }
 }
