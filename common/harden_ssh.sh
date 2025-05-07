@@ -16,3 +16,4 @@ sed -i 's/^#*\(PermitEmptyPasswords\) .*/\1 no/' /etc/ssh/sshd_config
 sed -i 's/^#*\(X11Forwarding\) .*/\1 no/' /etc/ssh/sshd_config
 
 echo "Configuration SSH terminée."
+
