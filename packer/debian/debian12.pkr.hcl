@@ -95,7 +95,7 @@ source "xenserver-iso" "debian12" {
   ssh_wait_timeout        = "60000s"
   ssh_handshake_attempts  = 10000
 
-  output_directory = "packer-debian-12"
+  output_directory = "packer-template-debian-12"
 
   # keep_vm = "on-success"__: Conserve la VM si le build réussit (idéal pour les tests)
   # keep_vm = "on-failure"__: Conserve la VM uniquement si le build échoue (utile pour déboguer)
