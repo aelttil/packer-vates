@@ -107,15 +107,13 @@ source "xenserver-iso" "debian12" {
 build {
   sources = ["xenserver-iso.debian12"]
 
-  # Transfert des scripts communs - CORRECTION
   provisioner "file" {
-    source      = "common/"
+    source      = "packer/common/"
     destination = "/tmp/"
   }
 
-  # Transfert des scripts spécifiques à Debian - CORRECTION
   provisioner "file" {
-    source      = "debian/common/"
+    source      = "packer/debian/common/"
     destination = "/tmp/"
   }
 
