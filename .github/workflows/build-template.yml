@@ -32,8 +32,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
 
       - name: Create credentials file
         run: |
@@ -58,7 +58,7 @@ jobs:
       - name: Process template
         run: |
           TEMPLATE="${{ github.event.inputs.template || 'debian12' }}"
-          python process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
+          python3 process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
 
       - name: Save artifacts locally
         run: |

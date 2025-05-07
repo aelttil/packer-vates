@@ -16,7 +16,7 @@ Le script `process_template.py` automatise l'ensemble du processus de constructi
 
 - Python 3.6+
 - Packer installé et accessible dans le PATH
-- Dépendances Python installées: `pip install -r requirements.txt`
+- Dépendances Python installées: `python3 -m pip install -r requirements.txt`
 - Fichier `.env` configuré pour l'accès S3
 
 ### Utilisation
@@ -37,10 +37,10 @@ Le script shell vérifie automatiquement que tous les fichiers nécessaires exis
 
 ```bash
 # Syntaxe de base
-./process_template.py <template_file> <var_file>
+python3 process_template.py <template_file> <var_file>
 
 # Exemple avec Debian 12
-./process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
+python3 process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
 ```
 
 ### Configuration S3
