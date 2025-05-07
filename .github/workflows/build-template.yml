@@ -21,7 +21,14 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        run: |
+          # Checkout code manually if the action fails
+          if [ -d ".git" ]; then
+            git pull
+          else
+            git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" .
+            git checkout "${GITHUB_REF#refs/heads/}"
+          fi
 
       - name: Install dependencies
         run: |
@@ -53,10 +60,9 @@ jobs:
           TEMPLATE="${{ github.event.inputs.template || 'debian12' }}"
           python process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
 
-      - name: Upload artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: template-artifacts
-          path: |
-            metadata-*.json
-            packer-build-*.log
+      - name: Save artifacts locally
+        run: |
+          mkdir -p artifacts
+          cp metadata-*.json artifacts/ || true
+          cp packer-build-*.log artifacts/ || true
+          echo "Les artefacts ont été sauvegardés dans le dossier 'artifacts'"

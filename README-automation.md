@@ -123,12 +123,14 @@ Le workflow peut être déclenché de trois façons:
 
 ### Artefacts
 
-Le workflow télécharge les artefacts suivants vers GitHub:
+Le workflow sauvegarde les artefacts suivants dans un dossier local `artifacts` sur le runner:
 
 - Fichier JSON de métadonnées
 - Fichier log de la construction
 
 Le fichier XVA est téléchargé uniquement vers S3 en raison de sa taille.
+
+> **Note**: Les artefacts sont sauvegardés localement plutôt que téléchargés vers GitHub pour éviter les problèmes de connectivité avec les actions GitHub.
 
 ## Ajout d'un nouveau template
 
