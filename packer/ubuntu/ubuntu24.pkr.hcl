@@ -116,9 +116,9 @@ source "xenserver-iso" "ubuntu24" {
   ssh_wait_timeout        = "60000s"
   ssh_handshake_attempts  = 10000
   ssh_skip_nat_mapping    = true
-
+  communicator = "ssh"
   output_directory = "packer-template-ubuntu-24.04"
-  
+  pause_before_connecting = "60s"
   # Conserver la VM en cas d'échec pour faciliter le débogage
   keep_vm          = "always"
   format = "xva_compressed"
