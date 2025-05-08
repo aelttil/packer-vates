@@ -109,7 +109,8 @@ source "xenserver-iso" "ubuntu24" {
   # keep_vm = "on-success"__: Conserve la VM si le build réussit (idéal pour les tests)
   # keep_vm = "on-failure"__: Conserve la VM uniquement si le build échoue (utile pour déboguer)
   # keep_vm = "always"__: Conserve toujours la VM, quel que soit le résultat du build
-  keep_vm          = "on-failure"
+  
+  keep_vm          = "never"
   format = "xva_compressed"
 }
 
