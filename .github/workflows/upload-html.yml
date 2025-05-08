@@ -1,0 +1,49 @@
+name: Upload HTML Template to S3
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'html_templates/**'
+      - 'upload_html_to_s3.py'
+      - '.github/workflows/upload-html.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'html_templates/**'
+      - 'upload_html_to_s3.py'
+      - '.github/workflows/upload-html.yml'
+  # Permettre le déclenchement manuel
+  workflow_dispatch:
+
+jobs:
+  upload-html:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        run: |
+          # Checkout code manually if the action fails
+          if [ -d ".git" ]; then
+            git pull
+          else
+            git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" .
+            git checkout "${GITHUB_REF#refs/heads/}"
+          fi
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install boto3
+
+      - name: Upload HTML template to S3
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+        run: |
+          python3 upload_html_to_s3.py
+          if [ -f "upload_log.txt" ]; then
+            echo "=== Contenu du fichier de log ==="
+            cat upload_log.txt
+          fi

@@ -85,11 +85,8 @@ def main():
                 )
                 
                 # Générer et afficher l'URL publique
-                if endpoint_url:
-                    public_url = f"{endpoint_url}/{bucket}/{object_name}"
-                else:
-                    public_url = f"https://s3.amazonaws.com/{bucket}/{object_name}"
-                
+                public_url = f"{endpoint_url}/{bucket}/{object_name}"
+
                 logger.info(f"Fichier configuré en accès public.")
                 logger.info(f"URL publique: {public_url}")
             except Exception as e:

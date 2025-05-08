@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Temple - Catalogue de Templates</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --white-color: #ffffff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 4px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: var(--light-color);
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--white-color);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+        
+        .logo {
+            height: 40px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .os-section {
+            background-color: var(--white-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .os-header {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .os-header img {
+            height: 30px;
+            margin-right: 15px;
+        }
+        
+        .os-header h2 {
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .os-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .os-content.active {
+            max-height: 2000px;
+            padding: 20px;
+        }
+        
+        .version-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--secondary-color);
+            margin-bottom: 20px;
+        }
+        
+        .version-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            margin-right: 5px;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+        
+        .version-tab.active {
+            background-color: var(--white-color);
+            border-color: var(--secondary-color);
+            border-bottom-color: var(--white-color);
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+        
+        .version-content {
+            display: none;
+        }
+        
+        .version-content.active {
+            display: block;
+        }
+        
+        .template-card {
+            background-color: var(--white-color);
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .template-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .template-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .template-date {
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+        
+        .template-info {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .template-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-right: 20px;
+        }
+        
+        .template-details {
+            flex: 1;
+        }
+        
+        .template-description {
+            margin-bottom: 10px;
+        }
+        
+        .template-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .template-meta-item {
+            background-color: var(--light-color);
+            padding: 5px 10px;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+        }
+        
+        .template-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .template-tag {
+            background-color: var(--info-color);
+            color: var(--white-color);
+            padding: 3px 8px;
+            border-radius: var(--border-radius);
+            font-size: 12px;
+        }
+        
+        .template-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: var(--white-color);
+        }
+        
+        .btn-info {
+            background-color: var(--info-color);
+            color: var(--white-color);
+        }
+        
+        .btn i {
+            margin-right: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: var(--secondary-color);
+        }
+        
+        .error {
+            background-color: var(--danger-color);
+            color: var(--white-color);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+        }
+        
+        .publisher-info {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        
+        .publisher-logo {
+            height: 30px;
+            margin-right: 10px;
+        }
+        
+        .publisher-name {
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .template-info {
+                flex-direction: column;
+            }
+            
+            .template-logo {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .template-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .btn {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Cloud Temple - Catalogue de Templates</h1>
+            <img src="https://www.cloud-temple.com/wp-content/themes/cloudtemple/assets/images/logos/logo-cloudtemple.svg" alt="Cloud Temple Logo" class="logo">
+        </header>
+        
+        <div id="content">
+            <div class="loading">Chargement des templates...</div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger le fichier JSON
+            fetch('template-os-metadata.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors du chargement des données: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayTemplates(data);
+                })
+                .catch(error => {
+                    document.getElementById('content').innerHTML = `
+                        <div class="error">
+                            ${error.message}
+                        </div>
+                    `;
+                });
+        });
+        
+        function displayTemplates(data) {
+            const contentElement = document.getElementById('content');
+            let html = '';
+            
+            // Trier les OS par nom
+            const sortedOS = Object.keys(data).sort();
+            
+            if (sortedOS.length === 0) {
+                html = '<div class="error">Aucun template disponible</div>';
+            } else {
+                sortedOS.forEach(os => {
+                    const osData = data[os];
+                    const versions = Object.keys(osData).sort((a, b) => parseInt(b) - parseInt(a)); // Trier par version décroissante
+                    
+                    html += `
+                        <div class="os-section">
+                            <div class="os-header" onclick="toggleOSContent(this.parentNode)">
+                                <img src="https://www.${os}.org/logos/logo-${os}.png" alt="${os} Logo" onerror="this.src='https://via.placeholder.com/30x30?text=${os}'">
+                                <h2>${os.charAt(0).toUpperCase() + os.slice(1)}</h2>
+                            </div>
+                            <div class="os-content">
+                                <div class="version-tabs">
+                    `;
+                    
+                    versions.forEach((version, index) => {
+                        html += `
+                            <div class="version-tab ${index === 0 ? 'active' : ''}" 
+                                 onclick="switchVersionTab(this, '${os}-${version}')">${version}</div>
+                        `;
+                    });
+                    
+                    html += `
+                                </div>
+                    `;
+                    
+                    versions.forEach((version, index) => {
+                        const templates = osData[version];
+                        
+                        html += `
+                            <div id="${os}-${version}" class="version-content ${index === 0 ? 'active' : ''}">
+                        `;
+                        
+                        // Trier les templates par date de publication (du plus récent au plus ancien)
+                        templates.sort((a, b) => {
+                            const dateA = new Date(a.release_date);
+                            const dateB = new Date(b.release_date);
+                            return dateB - dateA;
+                        });
+                        
+                        templates.forEach(template => {
+                            const timestamp = template.timestamp || '';
+                            const releaseDate = new Date(template.release_date).toLocaleDateString('fr-FR');
+                            
+                            html += `
+                                <div class="template-card">
+                                    <div class="template-header">
+                                        <div class="template-title">${template.name}</div>
+                                        <div class="template-date">Publié le ${releaseDate}</div>
+                                    </div>
+                                    <div class="template-info">
+                                        <img src="${template.template_logo_url}" alt="${template.os} Logo" class="template-logo" 
+                                             onerror="this.src='https://via.placeholder.com/80x80?text=${template.os}'">
+                                        <div class="template-details">
+                                            <div class="template-description">${template.description}</div>
+                                            <div class="template-meta">
+                                                <div class="template-meta-item">Version: ${template.version}</div>
+                                                <div class="template-meta-item">Plateforme: ${template.target_platform}</div>
+                                            </div>
+                                            <div class="template-tags">
+                            `;
+                            
+                            template.tags.forEach(tag => {
+                                html += `<div class="template-tag">${tag}</div>`;
+                            });
+                            
+                            html += `
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="publisher-info">
+                                        <img src="${template.publisher_logo_url}" alt="${template.publisher} Logo" class="publisher-logo"
+                                             onerror="this.src='https://via.placeholder.com/30x30?text=${template.publisher}'">
+                                        <div class="publisher-name">${template.publisher}</div>
+                                    </div>
+                                    <div class="template-actions">
+                                        <a href="${template.files[0]}" class="btn btn-primary" download>
+                                            <i>⬇️</i> Télécharger XVA
+                                        </a>
+                                        <a href="${template.files[0].replace('.xva', '-metadata.json')}" class="btn btn-info" target="_blank">
+                                            <i>ℹ️</i> Voir Métadonnées
+                                        </a>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        html += `
+                            </div>
+                        `;
+                    });
+                    
+                    html += `
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            contentElement.innerHTML = html;
+            
+            // Ouvrir la première section OS par défaut
+            if (sortedOS.length > 0) {
+                const firstOSSection = document.querySelector('.os-section');
+                toggleOSContent(firstOSSection);
+            }
+        }
+        
+        function toggleOSContent(section) {
+            const content = section.querySelector('.os-content');
+            content.classList.toggle('active');
+        }
+        
+        function switchVersionTab(tab, versionId) {
+            // Désactiver tous les onglets dans le même groupe
+            const tabs = tab.parentNode.querySelectorAll('.version-tab');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            // Activer l'onglet cliqué
+            tab.classList.add('active');
+            
+            // Masquer tous les contenus de version dans la même section
+            const osContent = tab.closest('.os-content');
+            const versionContents = osContent.querySelectorAll('.version-content');
+            versionContents.forEach(c => c.classList.remove('active'));
+            
+            // Afficher le contenu de version correspondant
+            document.getElementById(versionId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
