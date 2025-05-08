@@ -207,6 +207,7 @@ autoinstall:
     - sed -i 's/^#*\(PasswordAuthentication\) .*/\1 yes/' /target/etc/ssh/sshd_config
   # Éviter les interactions utilisateur
   interactive-sections:
+    - xe-guest-utilities
     - locale
     - keyboard
     - network

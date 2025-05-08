@@ -81,12 +81,17 @@ source "xenserver-iso" "ubuntu24" {
   http_directory = "packer/ubuntu/http"
   boot_wait            = "20s"
 
-  boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
-    "e<wait>",
-    "<down><down><down><end><wait>",
-    "<bs><bs><bs>",
-    " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"", "<enter><wait>",
-  "<f10>"]
+  floppy_files = [
+    "packer/ubuntu/http/meta-data/meta-data",
+    "packer/ubuntu/http/meta-data/user-data",
+  ]
+
+  # boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
+  #   "e<wait>",
+  #   "<down><down><down><end><wait>",
+  #   "<bs><bs><bs>",
+  #   " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"", "<enter><wait>",
+  # "<f10>"]
 
   # Change this to match the ISO of ubuntu you are using in the iso_url variable
   clone_template = "Generic Linux BIOS"
