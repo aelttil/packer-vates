@@ -114,7 +114,6 @@ source "xenserver-iso" "ubuntu24" {
   ssh_port                = 22
   ssh_wait_timeout        = "60000s"
   ssh_handshake_attempts  = 10000
-  ssh_extra_args          = ["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"]
 
   output_directory = "packer-template-ubuntu-24.04"
   
