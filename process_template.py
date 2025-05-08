@@ -17,6 +17,15 @@ def run_packer(template_file, var_file, log_file):
     """Exécute Packer et capture la sortie dans un fichier log"""
     print(f"Exécution de Packer avec le template {template_file}...")
     
+    # Réinitialiser le fichier known_hosts pour éviter les erreurs SSH
+    print("Réinitialisation du fichier ~/.ssh/known_hosts...")
+    try:
+        # Utiliser > pour vider le fichier (ou le créer s'il n'existe pas)
+        subprocess.run("cat /dev/null > ~/.ssh/known_hosts", shell=True, check=True)
+        print("Fichier ~/.ssh/known_hosts réinitialisé avec succès.")
+    except subprocess.CalledProcessError as e:
+        print(f"Avertissement: Impossible de réinitialiser le fichier ~/.ssh/known_hosts: {e}")
+    
     cmd = ["packer", "build", "-debug", "-var-file=" + var_file, template_file]
     
     # Créer une copie de l'environnement actuel et ajouter PACKER_LOG=1

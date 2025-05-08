@@ -105,7 +105,7 @@ source "xenserver-iso" "debian12" {
   # Change this to match the ISO of ubuntu you are using in the iso_url variable
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-debian-12"
-  vm_description = "Template Debian 12 (12.10)"
+  vm_description = "Template Debian 12 (12.10). Default login : 'admct'. Default password: 'InitCT@2025'"
   vcpus_max	 = 4
   vcpus_atstartup = 2
   vm_memory      = 4096 #MB
