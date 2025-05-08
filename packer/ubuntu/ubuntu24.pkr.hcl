@@ -87,6 +87,7 @@ source "xenserver-iso" "ubuntu24" {
     "<bs><bs><bs>",
     " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"",
     " ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:enX0:off ",
+    " nameserver=10.0.0.1",
     "<enter><wait>",
     "<f10>"
     ]
@@ -97,6 +98,7 @@ source "xenserver-iso" "ubuntu24" {
   #   "<tab><wait>",
   #   "autoinstall ds=nocloud-net;s=http://10.0.0.143:{{ .HTTPPort }}/ ",
   #   "ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:ens3:off ",
+
   #   "<f10>"
   # ]
 
@@ -121,6 +123,7 @@ source "xenserver-iso" "ubuntu24" {
   communicator = "ssh"
   output_directory = "packer-template-ubuntu-24.04"
   pause_before_connecting = "60s"
+
   # Conserver la VM en cas d'échec pour faciliter le débogage
   keep_vm          = "always"
   format = "xva_compressed"
