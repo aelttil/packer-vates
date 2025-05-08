@@ -320,14 +320,24 @@ def update_global_metadata(bucket, s3_client, endpoint_url, metadata, os_type, o
             json.dump(global_metadata, temp_file, indent=2)
             temp_file_path = temp_file.name
         
+        # Vérifier si le fichier doit être rendu public
+        make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
+        
+        # Préparer les arguments supplémentaires
+        extra_args = {
+            'ContentType': 'application/json'
+        }
+        
+        # Ajouter l'ACL si demandé ou toujours pour le fichier global de métadonnées
+        # Le fichier global de métadonnées est toujours rendu public pour être accessible via un navigateur
+        extra_args['ACL'] = 'public-read'
+        
         # Télécharger le fichier mis à jour
         s3_client.upload_file(
             temp_file_path, 
             bucket, 
             global_metadata_key,
-            ExtraArgs={
-                'ContentType': 'application/json'
-            }
+            ExtraArgs=extra_args
         )
         
         # Supprimer le fichier temporaire
