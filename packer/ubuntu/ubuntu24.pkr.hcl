@@ -79,17 +79,18 @@ source "xenserver-iso" "ubuntu24" {
   remote_username = var.remote_username
 
   http_directory = "packer/ubuntu/http"
-  boot_wait      = "30s"
+  boot_wait      = "10s"
 
-  # Commandes de démarrage spécifiques à Ubuntu 24.04
-  boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
+  # Commandes de démarrage simplifiées
+  boot_command = [
+    "<esc><wait>",
     "e<wait>",
-    "<down><down><down><end><wait>",
-    "<bs><bs><bs>",
-    " autoinstall ds=\"nocloud;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"", "<enter><wait>",
-  "<f10>"]
+    "<down><down><down><end>",
+    " autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:any:off",
+    "<f10>"
+  ]
 
-  clone_template = "generic_linux"
+  clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-24.04"
   vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template"
   vcpus_max      = 4
@@ -108,7 +109,7 @@ source "xenserver-iso" "ubuntu24" {
   output_directory = "packer-template-ubuntu-24.04"
   
   # Conserver la VM en cas d'échec pour faciliter le débogage
-  keep_vm          = "never"
+  keep_vm          = "always"
   format = "xva_compressed"
 }
 

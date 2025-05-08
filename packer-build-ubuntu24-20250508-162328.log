@@ -1,0 +1,8 @@
+Error: 1 error(s) occurred:
+
+* keep_vm must be one of 'always', 'never', 'on_success'
+
+  on packer/ubuntu/ubuntu24.pkr.hcl line 69:
+  (source code not available)
+
+
