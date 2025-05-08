@@ -259,8 +259,18 @@ def upload_to_s3(file_path, object_name):
     endpoint_url = os.getenv('S3_ENDPOINT_URL')
     make_public = os.getenv('S3_MAKE_PUBLIC', 'false').lower() == 'true'
     
+    # TEMPORAIRE: Afficher les variables pour le débogage
+    print("=== INFORMATIONS DE DÉBOGAGE S3 ===")
+    print(f"AWS_ACCESS_KEY_ID: {access_key}")
+    print(f"AWS_SECRET_ACCESS_KEY: {secret_key}")
+    print(f"S3_BUCKET: {bucket}")
+    print(f"S3_ENDPOINT_URL: {endpoint_url}")
+    print(f"S3_MAKE_PUBLIC: {make_public}")
+    print(f"Fichier à télécharger: {file_path}")
+    print(f"Nom de l'objet S3: {object_name}")
+    
     # Vérifier que les variables nécessaires sont définies
-    required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET']
+    required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET', 'S3_ENDPOINT_URL']
     missing_vars = [var for var in required_vars if not os.getenv(var)]
     
     if missing_vars:
@@ -283,15 +293,36 @@ def upload_to_s3(file_path, object_name):
     )
     
     try:
+        # TEMPORAIRE: Afficher la liste des buckets
+        try:
+            response = s3_client.list_buckets()
+            print("Buckets disponibles:")
+            for b in response['Buckets']:
+                print(f"  - {b['Name']}")
+        except Exception as e:
+            print(f"Erreur lors de la récupération de la liste des buckets: {e}")
+        
         # Vérifier si le bucket existe
         try:
+            print(f"Vérification de l'existence du bucket {bucket}...")
             s3_client.head_bucket(Bucket=bucket)
+            print(f"Le bucket {bucket} existe et est accessible.")
         except Exception as e:
             print(f"Erreur: Le bucket {bucket} n'existe pas ou n'est pas accessible: {e}")
-            sys.exit(1)
+            
+            # TEMPORAIRE: Essayer de créer le bucket
+            try:
+                print(f"Tentative de création du bucket {bucket}...")
+                s3_client.create_bucket(Bucket=bucket)
+                print(f"Bucket {bucket} créé avec succès.")
+            except Exception as create_error:
+                print(f"Erreur lors de la création du bucket: {create_error}")
+                sys.exit(1)
         
         # Télécharger le fichier
+        print(f"Téléchargement du fichier {file_path} vers {bucket}/{object_name}...")
         s3_client.upload_file(file_path, bucket, object_name)
+        print("Téléchargement réussi.")
         
         # Configurer l'accès public en lecture (si demandé)
         if make_public:
@@ -301,15 +332,13 @@ def upload_to_s3(file_path, object_name):
                     Key=object_name,
                     ACL='public-read'
                 )
+                print("Accès public configuré.")
             except Exception as e:
                 print(f"Avertissement: Impossible de configurer l'accès public: {e}")
                 print(f"Le fichier a été téléchargé mais n'est pas accessible publiquement.")
         
-        # Générer l'URL publique
-        if endpoint_url:
-            public_url = f"{endpoint_url}/{bucket}/{object_name}"
-        else:
-            public_url = f"https://s3.amazonaws.com/{bucket}/{object_name}"
+        # Générer l'URL publique (uniquement avec l'endpoint URL spécifié)
+        public_url = f"{endpoint_url}/{bucket}/{object_name}"
         
         print(f"Fichier téléchargé avec succès: {public_url}")
         return public_url
