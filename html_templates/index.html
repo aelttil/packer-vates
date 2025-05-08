@@ -1,1 +1,401 @@
-salut 
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Temple - Marketplace</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Palette de couleurs */
+            --primary-color: #0056b3;
+            --secondary-color: #6c757d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
+            --white-color: #ffffff;
+            
+            /* Ombres et arrondis */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            --border-radius-sm: 4px;
+            --border-radius: 8px;
+            
+            /* Transitions */
+            --transition: 0.2s ease;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            color: var(--gray-800);
+            background-color: var(--gray-100);
+            padding: 0;
+        }
+        
+        /* Header */
+        header {
+            background-color: var(--white-color);
+            padding: 1rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        header h1 {
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .logo {
+            height: 32px;
+        }
+        
+        .search-container {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius-sm);
+            font-size: 0.875rem;
+        }
+        
+        /* Main container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            display: flex;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 220px;
+            margin-right: 2rem;
+        }
+        
+        header .marketplace-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 0;
+            white-space: nowrap;
+        }
+        
+        .sidebar-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 1rem;
+        }
+        
+        .sidebar-menu {
+            list-style: none;
+        }
+        
+        .sidebar-menu-item {
+            padding: 0.5rem 0.75rem;
+            margin-bottom: 0.25rem;
+            border-radius: var(--border-radius-sm);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background-color var(--transition);
+        }
+        
+        .sidebar-menu-item:hover {
+            background-color: var(--gray-200);
+        }
+        
+        .sidebar-menu-item.active {
+            background-color: var(--gray-200);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* Main content */
+        .main-content {
+            flex-grow: 1;
+        }
+        
+        .marketplace-banner {
+            background: linear-gradient(135deg, #9c27b0, #673ab7);
+            color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+        
+        .marketplace-banner .marketplace-title {
+            color: white;
+            margin-bottom: 0;
+        }
+        
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--gray-900);
+        }
+        
+        /* Product grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .product-card {
+            background-color: var(--white-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: box-shadow var(--transition);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            box-shadow: var(--shadow);
+        }
+        
+        .product-logo {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            margin: 1.5rem auto 1rem;
+            display: block;
+        }
+        
+        .product-category {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+        
+        .product-name {
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 0.75rem;
+            padding: 0 1rem;
+        }
+        
+        .product-description {
+            padding: 0 1rem;
+            font-size: 0.875rem;
+            color: var(--gray-700);
+            margin-bottom: 1rem;
+            flex-grow: 1;
+        }
+        
+        .product-owner {
+            padding: 0.75rem 1rem;
+            background-color: var(--gray-100);
+            border-top: 1px solid var(--gray-200);
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+        }
+        
+        .product-owner-label {
+            margin-right: 0.5rem;
+        }
+        
+        .product-owner-name {
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        
+        /* Product actions */
+        .product-actions {
+            display: flex;
+            padding: 0.75rem 1rem;
+            background-color: var(--gray-100);
+            border-top: 1px solid var(--gray-200);
+            gap: 0.5rem;
+        }
+        
+        .product-action-button {
+            flex: 1;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 500;
+            border-radius: var(--border-radius-sm);
+            text-decoration: none;
+            transition: all var(--transition);
+        }
+        
+        .download-button {
+            background-color: var(--primary-color);
+            color: var(--white-color);
+        }
+        
+        .download-button:hover {
+            background-color: #004494;
+        }
+        
+        .info-button {
+            background-color: var(--gray-200);
+            color: var(--gray-700);
+        }
+        
+        .info-button:hover {
+            background-color: var(--gray-300);
+        }
+        
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-600);
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 1rem;
+            }
+            
+            .sidebar {
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 1.5rem;
+            }
+            
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1 class="marketplace-title">Cloud Temple Marketplace</h1>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Rechercher dans le Marketplace">
+        </div>
+        <img src="images/logo-cloudtemple-footer.svg" alt="Cloud Temple Logo" class="logo">
+    </header>
+    
+    <div class="container">
+        <aside class="sidebar">
+            <h2 class="sidebar-title">Catégories</h2>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item active">Tous les produits</li>
+                <li class="sidebar-menu-item">Systèmes d'exploitation</li>
+                <li class="sidebar-menu-item">Applications</li>
+                <li class="sidebar-menu-item">Bases de données</li>
+                <li class="sidebar-menu-item">Sécurité</li>
+                <li class="sidebar-menu-item">Développement</li>
+                <li class="sidebar-menu-item">Stockage</li>
+                <li class="sidebar-menu-item">Réseau</li>
+            </ul>
+        </aside>
+        
+        <main class="main-content">
+            <h2 class="page-title">Tous les produits</h2>
+            
+            <div id="content">
+                <div class="loading">Chargement des produits...</div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger le fichier JSON
+            fetch('template-os-metadata.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur lors du chargement des données: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    displayProducts(data);
+                })
+                .catch(error => {
+                    document.getElementById('content').innerHTML = `
+                        <div class="error">
+                            <p>Erreur: ${error.message}</p>
+                        </div>
+                    `;
+                });
+        });
+        
+        function displayProducts(data) {
+            const contentElement = document.getElementById('content');
+            let html = '<div class="product-grid">';
+            
+            // Parcourir tous les OS
+            Object.keys(data).forEach(os => {
+                const osData = data[os];
+                
+                // Parcourir toutes les versions de l'OS
+                Object.keys(osData).forEach(version => {
+                    const templates = osData[version];
+                    
+                    // Parcourir tous les templates de cette version
+                    templates.forEach(template => {
+                        html += `
+                            <div class="product-card">
+                                <img src="${os === 'debian' ? 'images/debian.png' : 'images/default-os.html'}" 
+                                     alt="${os} Logo" class="product-logo">
+                                <div class="product-category">Système d'exploitation</div>
+                                <h3 class="product-name">${template.name}</h3>
+                                <div class="product-description">${template.description}</div>
+                                <div class="product-owner">
+                                    <span class="product-owner-label">Publié par:</span>
+                                    <span class="product-owner-name">${template.publisher}</span>
+                                </div>
+                                <div class="product-actions">
+                                    <a href="${template.files[0]}" class="product-action-button download-button">Télécharger</a>
+                                    <a href="${template.files[0].replace('.xva', '-metadata.json')}" class="product-action-button info-button">Métadonnées</a>
+                                </div>
+                            </div>
+                        `;
+                    });
+                });
+            });
+            
+            html += '</div>';
+            contentElement.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
