@@ -2,9 +2,25 @@
 autoinstall:
   version: 1
   identity:
-    hostname: ubuntu-server
-    password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
-    username: ubuntu
-  locale: en_US
-  keyboard:
-    layout: de
+    hostname: ubuntu
+    username: admct
+    password: "$6$rounds=4096$8dKUOuD/$mDpQhSWJ8qOKHRr0j0i6qE3mm.gk32XvGNtQBmHG1WxjJ8kNaCwOrdHq.2S7RpSQ490fT/9PqkGbGv3r/vvvf0"
+  # network:
+  #   version: 2
+  #   ethernets:
+  #     "en*":
+  #       dhcp4: false
+  #       addresses:
+  #         - 10.0.0.144/24
+  #       gateway4: 10.0.0.254
+  #       nameservers:
+  #         addresses: [8.8.8.8, 8.8.4.4]
+  ssh:
+    install-server: true
+    allow-pw: true
+  packages:
+    - openssh-server
+    - sudo
+  late-commands:
+    - echo 'admct ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/admct
+    - chmod 440 /target/etc/sudoers.d/admct
