@@ -17,10 +17,14 @@ def run_packer(template_file, var_file, log_file):
     """Exécute Packer et capture la sortie dans un fichier log"""
     print(f"Exécution de Packer avec le template {template_file}...")
     
-    cmd = ["packer", "build", "-var-file=" + var_file, template_file]
+    cmd = ["packer", "build", "-debug", "-var-file=" + var_file, template_file]
+    
+    # Créer une copie de l'environnement actuel et ajouter PACKER_LOG=1
+    env = os.environ.copy()
+    env["PACKER_LOG"] = "1"
     
     with open(log_file, 'w') as f:
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)
         
         # Capture la sortie en temps réel
         for line in process.stdout:
