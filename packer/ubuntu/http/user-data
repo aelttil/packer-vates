@@ -4,7 +4,7 @@ autoinstall:
   identity:
     hostname: template-ubuntu24
     username: admct
-    lock_passwd: 'InitCT@2025'
+    password: "$6$exDY1mhS4KUYCE/2$zmn9ToZwTKLhCw.b4/b.ZRTIZM30JZ4QrOQ2aOXJ8yk96xpcCof0kxKwuX1kqLG/ygbJ1f8wxED22bTL4F46P0"
 
   # network:
   #   version: 2
