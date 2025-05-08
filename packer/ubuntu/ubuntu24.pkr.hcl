@@ -85,9 +85,11 @@ source "xenserver-iso" "ubuntu24" {
     "e<wait>",
     "<down><down><down><end><wait>",
     "<bs><bs><bs>",
-    " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"", "<enter><wait>",
-    "ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:enX0:off ",
-  "<f10>"]
+    " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"",
+    " ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:enX0:off ",
+    "<enter><wait>",
+    "<f10>"
+    ]
 
   # # Nouvelles commandes de démarrage basées sur la documentation officielle
   # boot_command = [
