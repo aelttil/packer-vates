@@ -79,7 +79,6 @@ source "xenserver-iso" "ubuntu24" {
   remote_username = var.remote_username
 
   http_directory = "packer/ubuntu/http"
-
   boot_wait            = "20s"
 
   boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
