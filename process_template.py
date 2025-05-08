@@ -8,7 +8,6 @@ import re
 import hcl2
 import boto3
 from botocore.config import Config
-from dotenv import load_dotenv
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -251,9 +250,6 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
 def upload_to_s3(file_path, object_name):
     """Télécharge un fichier vers S3 et retourne l'URL"""
     print(f"Téléchargement de {file_path} vers S3...")
-    
-    # Charger les variables d'environnement (essayer les deux méthodes)
-    load_dotenv(dotenv_path=".env")
     
     # Récupérer les variables depuis le fichier .env ou directement des variables d'environnement
     access_key = os.environ.get('AWS_ACCESS_KEY_ID')
