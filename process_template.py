@@ -204,16 +204,25 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
     # Extraction des informations pertinentes du fichier HCL
     try:
         if isinstance(hcl_data, dict):
+            # Extraire les valeurs des variables
+            if "variable" in hcl_data:
+                variables = hcl_data["variable"]
+                if "template_logo_url" in variables and "default" in variables["template_logo_url"]:
+                    template_logo_url = variables["template_logo_url"]["default"]
+                if "publisher_logo_url" in variables and "default" in variables["publisher_logo_url"]:
+                    publisher_logo_url = variables["publisher_logo_url"]["default"]
+                if "publisher" in variables and "default" in variables["publisher"]:
+                    publisher = variables["publisher"]["default"]
+                if "target_platform" in variables and "default" in variables["target_platform"]:
+                    target_platform = variables["target_platform"]["default"]
+            
+            # Extraire les informations de la VM
             source_data = hcl_data.get("source", {}).get("xenserver-iso", {})
             first_source_key = next(iter(source_data.keys()), None)
             if first_source_key:
                 source_config = source_data[first_source_key]
                 vm_name = source_config.get("vm_name", vm_name)
                 vm_description = source_config.get("vm_description", vm_description)
-                template_logo_url = source_config.get("template_logo_url", template_logo_url)
-                publisher_logo_url = source_config.get("publisher_logo_url", publisher_logo_url)
-                publisher = source_config.get("publisher", publisher)
-                target_platform = source_config.get("target_platform", target_platform)
                 if "vm_tags" in source_config:
                     vm_tags = source_config.get("vm_tags")
         elif isinstance(hcl_data, list):
@@ -230,14 +239,7 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
                                 vm_description = value.get("vm_description")
                             if "vm_tags" in value:
                                 vm_tags = value.get("vm_tags")
-                            if "template_logo_url" in value:
-                                template_logo_url = value.get("template_logo_url")
-                            if "publisher_logo_url" in value:
-                                publisher_logo_url = value.get("publisher_logo_url")
-                            if "publisher" in value:
-                                publisher = value.get("publisher")
-                            if "target_platform" in value:
-                                target_platform = value.get("target_platform")
+                            # Ne plus chercher ces valeurs dans la section source
     except Exception as e:
         print(f"Avertissement: Impossible d'extraire les informations de la VM à partir du fichier HCL: {e}")
         print(f"Utilisation des valeurs par défaut")
