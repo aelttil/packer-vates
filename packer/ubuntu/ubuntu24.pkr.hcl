@@ -81,14 +81,23 @@ source "xenserver-iso" "ubuntu24" {
   http_directory = "packer/ubuntu/http"
   boot_wait      = "5s"
 
-  # Nouvelles commandes de démarrage basées sur la documentation officielle
   boot_command = [
     "<wait><wait><wait><wait><wait>",
     "<tab><wait>",
     "autoinstall ds=nocloud-net;s=http://10.0.0.143:{{ .HTTPPort }}/ ",
     "ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:ens3:off ",
-    "<f10>"
+    "debug=1 verbose=1 DEBCONF_DEBUG=developer ",
+    "<enter><wait>"
   ]
+
+  # # Nouvelles commandes de démarrage basées sur la documentation officielle
+  # boot_command = [
+  #   "<wait><wait><wait><wait><wait>",
+  #   "<tab><wait>",
+  #   "autoinstall ds=nocloud-net;s=http://10.0.0.143:{{ .HTTPPort }}/ ",
+  #   "ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:ens3:off ",
+  #   "<f10>"
+  # ]
 
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-24.04"
