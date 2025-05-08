@@ -5,6 +5,7 @@ import json
 import subprocess
 import datetime
 import re
+import tempfile
 import hcl2
 import boto3
 from botocore.config import Config
@@ -195,6 +196,10 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
     vm_name = f"{os_type}-{os_version}"
     vm_description = f"{os_type.capitalize()} {os_version} Template"
     vm_tags = [os_type, f"{os_type}{os_version}", "cloud-init"]
+    template_logo_url = "NA"  # Valeur par défaut
+    publisher_logo_url = "NA"  # Valeur par défaut
+    publisher = "Cloud Temple"  # Valeur par défaut
+    target_platform = "NA"  # Valeur par défaut
     
     # Extraction des informations pertinentes du fichier HCL
     try:
@@ -205,6 +210,10 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
                 source_config = source_data[first_source_key]
                 vm_name = source_config.get("vm_name", vm_name)
                 vm_description = source_config.get("vm_description", vm_description)
+                template_logo_url = source_config.get("template_logo_url", template_logo_url)
+                publisher_logo_url = source_config.get("publisher_logo_url", publisher_logo_url)
+                publisher = source_config.get("publisher", publisher)
+                target_platform = source_config.get("target_platform", target_platform)
                 if "vm_tags" in source_config:
                     vm_tags = source_config.get("vm_tags")
         elif isinstance(hcl_data, list):
@@ -221,6 +230,14 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
                                 vm_description = value.get("vm_description")
                             if "vm_tags" in value:
                                 vm_tags = value.get("vm_tags")
+                            if "template_logo_url" in value:
+                                template_logo_url = value.get("template_logo_url")
+                            if "publisher_logo_url" in value:
+                                publisher_logo_url = value.get("publisher_logo_url")
+                            if "publisher" in value:
+                                publisher = value.get("publisher")
+                            if "target_platform" in value:
+                                target_platform = value.get("target_platform")
     except Exception as e:
         print(f"Avertissement: Impossible d'extraire les informations de la VM à partir du fichier HCL: {e}")
         print(f"Utilisation des valeurs par défaut")
@@ -230,11 +247,12 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
         "name": f"{vm_name} Cloud",
         "os": os_type,
         "version": f"{os_version}.0",
-        "target_platform": "openiaas",
+        "target_platform": target_platform,
         "files": [s3_url],
-        "description": f"Default password : TOTO {vm_description}, SSH activé, user cloud-init préconfiguré.",
-        "logo_url": f"https://assets.symbios/logo-{os_type}.png",
-        "publisher": "CLOUDTEMPLE",
+        "description": f"{vm_description}",
+        "template_logo_url": template_logo_url,
+        "publisher_logo_url": publisher_logo_url,
+        "publisher": publisher,
         "tags": vm_tags,
         "release_date": datetime.datetime.now().strftime("%Y-%m-%d")
     }
@@ -247,14 +265,87 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
     print(f"Fichier de métadonnées généré: {metadata_file}")
     return metadata_file
 
-def upload_to_s3(file_path, object_name):
+def cleanup_local_files(log_file, metadata_file, output_dir):
+    """Nettoie les fichiers locaux après le téléchargement vers S3"""
+    print("Nettoyage des fichiers locaux...")
+    
+    # Supprimer le fichier log
+    if os.path.exists(log_file):
+        os.remove(log_file)
+        print(f"Fichier log supprimé: {log_file}")
+    
+    # Supprimer le fichier de métadonnées
+    if os.path.exists(metadata_file):
+        os.remove(metadata_file)
+        print(f"Fichier de métadonnées supprimé: {metadata_file}")
+    
+    # Supprimer le répertoire de sortie Packer
+    if os.path.exists(output_dir):
+        import shutil
+        shutil.rmtree(output_dir)
+        print(f"Répertoire de sortie supprimé: {output_dir}")
+
+def update_global_metadata(bucket, s3_client, endpoint_url, metadata, os_type, os_version, timestamp):
+    """Met à jour le fichier global de métadonnées à la racine du bucket S3"""
+    global_metadata_key = "template-os-metadata.json"
+    
+    # Ajouter le timestamp aux métadonnées
+    metadata_copy = metadata.copy()
+    metadata_copy["timestamp"] = timestamp
+    
+    try:
+        # Vérifier si le fichier existe
+        try:
+            response = s3_client.get_object(Bucket=bucket, Key=global_metadata_key)
+            global_metadata = json.loads(response['Body'].read().decode('utf-8'))
+            print(f"Fichier global de métadonnées existant trouvé: {global_metadata_key}")
+        except Exception as e:
+            print(f"Le fichier global de métadonnées n'existe pas, création d'un nouveau fichier: {e}")
+            global_metadata = {}
+        
+        # S'assurer que la structure existe
+        if os_type not in global_metadata:
+            global_metadata[os_type] = {}
+        
+        if os_version not in global_metadata[os_type]:
+            global_metadata[os_type][os_version] = []
+        
+        # Ajouter les nouvelles métadonnées
+        global_metadata[os_type][os_version].append(metadata_copy)
+        
+        # Créer un fichier temporaire
+        with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
+            json.dump(global_metadata, temp_file, indent=2)
+            temp_file_path = temp_file.name
+        
+        # Télécharger le fichier mis à jour
+        s3_client.upload_file(
+            temp_file_path, 
+            bucket, 
+            global_metadata_key,
+            ExtraArgs={
+                'ContentType': 'application/json'
+            }
+        )
+        
+        # Supprimer le fichier temporaire
+        os.remove(temp_file_path)
+        
+        print(f"Fichier global de métadonnées mis à jour: {global_metadata_key}")
+        return f"{endpoint_url}/{bucket}/{global_metadata_key}"
+    
+    except Exception as e:
+        print(f"Erreur lors de la mise à jour du fichier global de métadonnées: {e}")
+        return None
+
+def upload_to_s3(file_path, object_name, content_type=None):
     """Télécharge un fichier vers S3 et retourne l'URL"""
     print(f"Téléchargement de {file_path} vers S3...")
     
-    # Récupérer les variables depuis le fichier .env ou directement des variables d'environnement
+    # Récupérer les variables depuis les variables d'environnement
     access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    bucket = "packer-vates" #os.environ.get('S3_BUCKET')
+    bucket = os.environ.get('S3_BUCKET')
     endpoint_url = os.environ.get('S3_ENDPOINT_URL')
     make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
     
@@ -325,9 +416,14 @@ def upload_to_s3(file_path, object_name):
         #         print(f"Erreur lors de la création du bucket: {create_error}")
         #         sys.exit(1)
         
+        # Préparer les arguments supplémentaires
+        extra_args = {}
+        if content_type:
+            extra_args['ContentType'] = content_type
+        
         # Télécharger le fichier
         print(f"Téléchargement du fichier {file_path} vers {bucket}/{object_name}...")
-        s3_client.upload_file(file_path, bucket, object_name)
+        s3_client.upload_file(file_path, bucket, object_name, ExtraArgs=extra_args)
         print("Téléchargement réussi.")
         
         # Configurer l'accès public en lecture (si demandé)
@@ -404,29 +500,48 @@ def main():
     
     xva_file = find_output_file(log_content, output_dir)
     
-    # Créer un dossier pour ce build
-    build_folder = f"templates/{os_type}{os_version}/{timestamp}"
+    # Utiliser le nom de l'OS comme dossier pour ce build
+    build_folder = f"{os_type}"
     
     # Étape 4: Télécharger le fichier XVA vers S3
-    s3_object_name = f"{build_folder}/{os_type}{os_version}.xva"
+    s3_object_name = f"{build_folder}/{os_type}{os_version}-{timestamp}.xva"
     s3_url = upload_to_s3(xva_file, s3_object_name)
     
     # Étape 5: Générer le fichier de métadonnées
     metadata_file = generate_metadata(template_file, hcl_data, xva_file, s3_url)
     
     # Étape 6: Télécharger le fichier de métadonnées vers S3
-    metadata_s3_object = f"{build_folder}/metadata.json"
-    metadata_url = upload_to_s3(metadata_file, metadata_s3_object)
+    metadata_s3_object = f"{build_folder}/{os_type}{os_version}-{timestamp}-metadata.json"
+    metadata_url = upload_to_s3(metadata_file, metadata_s3_object, content_type='application/json')
     
     # Étape 7: Télécharger le fichier log vers S3
-    log_s3_object = f"{build_folder}/build.log"
-    log_url = upload_to_s3(log_file, log_s3_object)
+    log_s3_object = f"{build_folder}/{os_type}{os_version}-{timestamp}-build.log"
+    log_url = upload_to_s3(log_file, log_s3_object, content_type='text/plain')
+    
+    # Étape 8: Mettre à jour le fichier global de métadonnées
+    with open(metadata_file, 'r') as f:
+        metadata_content = json.load(f)
+    
+    global_metadata_url = update_global_metadata(
+        bucket, 
+        s3_client, 
+        endpoint_url, 
+        metadata_content, 
+        os_type, 
+        os_version, 
+        timestamp
+    )
+    
+    # Étape 9: Nettoyer les fichiers locaux
+    cleanup_local_files(log_file, metadata_file, output_dir)
     
     print("\n=== Processus terminé avec succès ===")
     print(f"Système d'exploitation: {os_type} {os_version}")
     print(f"Fichier XVA: {s3_url}")
     print(f"Métadonnées: {metadata_url}")
     print(f"Log: {log_url}")
+    print(f"Fichier global de métadonnées: {global_metadata_url}")
+    print(f"Les fichiers locaux ont été nettoyés")
 
 if __name__ == "__main__":
     main()

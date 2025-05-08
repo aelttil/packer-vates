@@ -64,10 +64,10 @@ jobs:
           TEMPLATE="${{ github.event.inputs.template || 'debian12' }}"
           python3 process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
 
-      - name: Save artifacts locally
+      # Les artefacts sont directement téléchargés vers S3 et les fichiers locaux sont nettoyés
+      - name: Cleanup
         run: |
-          mkdir -p artifacts
-          cp metadata-*.json artifacts/ || true
-          cp packer-build-*.log artifacts/ || true
-          echo "Les artefacts ont été sauvegardés dans le dossier 'artifacts'"
-          echo "Note: Les fichiers ont déjà été téléchargés vers S3 par le script process_template.py"
+          echo "Les artefacts ont été téléchargés vers S3 et les fichiers locaux ont été nettoyés"
+          echo "Structure S3: {environnement}/{os_type}{os_version}-{timestamp}.xva"
+          echo "              {environnement}/{os_type}{os_version}-{timestamp}-metadata.json"
+          echo "              {environnement}/{os_type}{os_version}-{timestamp}-build.log"
