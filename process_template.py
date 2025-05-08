@@ -254,7 +254,7 @@ def upload_to_s3(file_path, object_name):
     # Récupérer les variables depuis le fichier .env ou directement des variables d'environnement
     access_key = os.environ.get('AWS_ACCESS_KEY_ID')
     secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    bucket = os.environ.get('S3_BUCKET')
+    bucket = "packer-vates" #os.environ.get('S3_BUCKET')
     endpoint_url = os.environ.get('S3_ENDPOINT_URL')
     make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
     
@@ -299,31 +299,31 @@ def upload_to_s3(file_path, object_name):
     )
     
     try:
-        # TEMPORAIRE: Afficher la liste des buckets
-        try:
-            response = s3_client.list_buckets()
-            print("Buckets disponibles:")
-            for b in response['Buckets']:
-                print(f"  - {b['Name']}")
-        except Exception as e:
-            print(f"Erreur lors de la récupération de la liste des buckets: {e}")
+        # # TEMPORAIRE: Afficher la liste des buckets
+        # try:
+        #     response = s3_client.list_buckets()
+        #     print("Buckets disponibles:")
+        #     for b in response['Buckets']:
+        #         print(f"  - {b['Name']}")
+        # except Exception as e:
+        #     print(f"Erreur lors de la récupération de la liste des buckets: {e}")
         
-        # Vérifier si le bucket existe
-        try:
-            print(f"Vérification de l'existence du bucket {bucket}...")
-            s3_client.head_bucket(Bucket=bucket)
-            print(f"Le bucket {bucket} existe et est accessible.")
-        except Exception as e:
-            print(f"Erreur: Le bucket {bucket} n'existe pas ou n'est pas accessible: {e}")
+        # # Vérifier si le bucket existe
+        # try:
+        #     print(f"Vérification de l'existence du bucket {bucket}...")
+        #     s3_client.head_bucket(Bucket=bucket)
+        #     print(f"Le bucket {bucket} existe et est accessible.")
+        # except Exception as e:
+        #     print(f"Erreur: Le bucket {bucket} n'existe pas ou n'est pas accessible: {e}")
             
-            # TEMPORAIRE: Essayer de créer le bucket
-            try:
-                print(f"Tentative de création du bucket {bucket}...")
-                s3_client.create_bucket(Bucket=bucket)
-                print(f"Bucket {bucket} créé avec succès.")
-            except Exception as create_error:
-                print(f"Erreur lors de la création du bucket: {create_error}")
-                sys.exit(1)
+        #     # TEMPORAIRE: Essayer de créer le bucket
+        #     try:
+        #         print(f"Tentative de création du bucket {bucket}...")
+        #         s3_client.create_bucket(Bucket=bucket)
+        #         print(f"Bucket {bucket} créé avec succès.")
+        #     except Exception as create_error:
+        #         print(f"Erreur lors de la création du bucket: {create_error}")
+        #         sys.exit(1)
         
         # Télécharger le fichier
         print(f"Téléchargement du fichier {file_path} vers {bucket}/{object_name}...")
