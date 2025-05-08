@@ -79,20 +79,17 @@ source "xenserver-iso" "ubuntu24" {
   remote_username = var.remote_username
 
   http_directory = "packer/ubuntu/http"
-  boot_wait      = "10s"
+  boot_wait      = "30s"
 
   # Commandes de démarrage spécifiques à Ubuntu 24.04
-  boot_command = [
-    "c",
-    "linux /casper/vmlinuz --- autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/",
-    "<enter>",
-    "initrd /casper/initrd",
-    "<enter>",
-    "boot",
-    "<enter>"
-  ]
+  boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
+    "e<wait>",
+    "<down><down><down><end><wait>",
+    "<bs><bs><bs>",
+    " autoinstall ds=\"nocloud;seedfrom=http://{{ .HTTPIP }}:{{ .HTTPPort }}/\"", "<enter><wait>",
+  "<f10>"]
 
-  clone_template = "Generic Linux BIOS"
+  clone_template = "generic_linux"
   vm_name        = "template-ubuntu-24.04"
   vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template"
   vcpus_max      = 4
