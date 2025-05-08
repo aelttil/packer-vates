@@ -100,7 +100,7 @@ source "xenserver-iso" "ubuntu24" {
 
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-24.04"
-  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template"
+  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template. Default login : 'admct'. Default password: 'InitCT@2025'"
   vcpus_max      = 4
   vcpus_atstartup = 2
   vm_memory      = 4096 #MB
@@ -115,6 +115,7 @@ source "xenserver-iso" "ubuntu24" {
   ssh_port                = 22
   ssh_wait_timeout        = "60000s"
   ssh_handshake_attempts  = 10000
+  ssh_skip_nat_mapping    = true
 
   output_directory = "packer-template-ubuntu-24.04"
   
