@@ -79,14 +79,14 @@ source "xenserver-iso" "ubuntu24" {
   remote_username = var.remote_username
 
   http_directory = "packer/ubuntu/http"
-  boot_wait      = "10s"
+  boot_wait      = "5s"
 
-  # Commandes de démarrage simplifiées
+  # Nouvelles commandes de démarrage basées sur la documentation officielle
   boot_command = [
-    "<esc><wait>",
-    "e<wait>",
-    "<down><down><down><end>",
-    " autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:any:off",
+    "<wait><wait><wait><wait><wait>",
+    "<tab><wait>",
+    "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ",
+    "ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:ens3:off ",
     "<f10>"
   ]
 
