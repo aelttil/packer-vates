@@ -85,7 +85,7 @@ source "xenserver-iso" "ubuntu24" {
   boot_command = [
     "<wait><wait><wait><wait><wait>",
     "<tab><wait>",
-    "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ",
+    "autoinstall ds=nocloud-net;s=http://10.0.0.143:{{ .HTTPPort }}/ ",
     "ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:ens3:off ",
     "<f10>"
   ]
