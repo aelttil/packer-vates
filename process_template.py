@@ -17,7 +17,7 @@ def run_packer(template_file, var_file, log_file):
     """Exécute Packer et capture la sortie dans un fichier log"""
     print(f"Exécution de Packer avec le template {template_file}...")
     
-    cmd = ["PACKER_LOG=1", "packer", "build", "-var-file=" + var_file, template_file]
+    cmd = ["packer", "build", "-var-file=" + var_file, template_file]
     
     with open(log_file, 'w') as f:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
