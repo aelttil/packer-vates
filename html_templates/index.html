@@ -309,7 +309,7 @@
         <div class="search-container">
             <input type="text" class="search-input" placeholder="Rechercher dans le Marketplace">
         </div>
-        <img src="images/logo-cloudtemple-footer.svg" alt="Cloud Temple Logo" class="logo">
+        <img src="images/cloudtemple.svg" alt="Cloud Temple Logo" class="logo">
     </header>
     
     <div class="container">
@@ -374,7 +374,7 @@
                     templates.forEach(template => {
                         html += `
                             <div class="product-card">
-                                <img src="${os === 'debian' ? 'images/debian.png' : 'images/default-os.html'}" 
+                                <img src="${os === 'debian' ? 'images/debian.png' : os === 'ubuntu' ? 'images/ubuntu.png' : 'images/default-os.png'}" 
                                      alt="${os} Logo" class="product-logo">
                                 <div class="product-category">Système d'exploitation</div>
                                 <h3 class="product-name">${template.name}</h3>
