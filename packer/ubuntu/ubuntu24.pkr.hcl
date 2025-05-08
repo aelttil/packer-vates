@@ -80,6 +80,8 @@ source "xenserver-iso" "ubuntu24" {
 
   http_directory = "packer/ubuntu/http"
 
+  boot_wait            = "20s"
+
   boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
     "e<wait>",
     "<down><down><down><end><wait>",
@@ -87,10 +89,12 @@ source "xenserver-iso" "ubuntu24" {
     " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"", "<enter><wait>",
   "<f10>"]
 
+  headless = true
+
   # Change this to match the ISO of ubuntu you are using in the iso_url variable
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-24.04"
-  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template for automation. \nDefault login: `admct` \nDefault password `InitCT@2025`."
+  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template for automation. Default login: `admct` Default password `InitCT@2025`."
   vcpus_max      = 4
   vcpus_atstartup = 2
   vm_memory      = 4096 #MB
