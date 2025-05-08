@@ -6,6 +6,8 @@ on:
     paths:
       - 'packer/**'
       - '.github/workflows/build-template.yml'
+      - 'process_template.py'
+      - '*.py'
   pull_request:
     branches: [ main ]
   # Permettre le déclenchement manuel
