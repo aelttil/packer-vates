@@ -82,8 +82,8 @@ source "xenserver-iso" "ubuntu24" {
   boot_wait            = "20s"
 
   floppy_files = [
-    "packer/ubuntu/http/meta-data/meta-data",
-    "packer/ubuntu/http/meta-data/user-data",
+    "packer/ubuntu/http/meta-data",
+    "packer/ubuntu/http/user-data",
   ]
 
   # boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
