@@ -1,22 +1,17 @@
-name: Build and Upload Template
+name: Build Ubuntu 24.04 Template
 
 on:
   push:
     branches: [ main ]
     paths:
-      - 'packer/**'
-      - '.github/workflows/build-template.yml'
+      - 'packer/ubuntu/**'
+      - 'packer/common/**'
+      - '.github/workflows/build-ubuntu24.yml'
       - 'process_template.py'
-      - '*.py'
   pull_request:
     branches: [ main ]
   # Permettre le déclenchement manuel
   workflow_dispatch:
-    inputs:
-      template:
-        description: 'Template à construire (debian12, ubuntu22, etc.)'
-        required: true
-        default: 'debian12'
 
 jobs:
   build:
@@ -50,8 +45,8 @@ jobs:
 
       - name: Initialize Packer
         run: |
-          cd packer/debian
-          packer init debian12.pkr.hcl
+          cd packer/ubuntu
+          packer init ubuntu24.pkr.hcl
           cd ../..
 
       - name: Process template
@@ -61,8 +56,7 @@ jobs:
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
         run: |
-          TEMPLATE="${{ github.event.inputs.template || 'debian12' }}"
-          python3 process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
+          python3 process_template.py packer/ubuntu/ubuntu24.pkr.hcl credentials.pkrvars.hcl
 
       # Les artefacts sont directement téléchargés vers S3 et les fichiers locaux sont nettoyés
       - name: Cleanup
