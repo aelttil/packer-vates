@@ -131,7 +131,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "packer/ubuntu/common/"
+    source      = "packer/ubuntu/extras/"
     destination = "/tmp/"
   }
 
@@ -146,7 +146,6 @@ build {
       "sudo /tmp/harden_system.sh",
       
       # Scripts spécifiques à Ubuntu
-      "sudo /tmp/install_xen_tools.sh",
       "sudo /tmp/ubuntu_specific.sh",
       
       # Nettoyage final (commun)
