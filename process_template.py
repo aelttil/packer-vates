@@ -340,56 +340,65 @@ def update_global_metadata(bucket, s3_client, endpoint_url, metadata, os_type, o
         print(f"Erreur lors de la mise à jour du fichier global de métadonnées: {e}")
         return None
 
-def upload_to_s3(file_path, object_name, content_type=None):
+def upload_to_s3(file_path, object_name, content_type=None, s3_client=None, bucket=None, endpoint_url=None):
     """Télécharge un fichier vers S3 et retourne l'URL"""
     print(f"Téléchargement de {file_path} vers S3...")
     
-    # Récupérer les variables depuis les variables d'environnement
-    access_key = os.environ.get('AWS_ACCESS_KEY_ID')
-    secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    bucket = os.environ.get('S3_BUCKET')
-    endpoint_url = os.environ.get('S3_ENDPOINT_URL')
-    make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
+    # Si les variables S3 ne sont pas passées en paramètres, les récupérer depuis les variables d'environnement
+    if s3_client is None or bucket is None or endpoint_url is None:
+        access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+        secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+        bucket = os.environ.get('S3_BUCKET')
+        endpoint_url = os.environ.get('S3_ENDPOINT_URL')
+        make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
+        
+        # TEMPORAIRE: Afficher les variables pour le débogage
+        print("=== INFORMATIONS DE DÉBOGAGE S3 ===")
+        print(f"AWS_ACCESS_KEY_ID: {access_key[:4]}...{access_key[-4:] if access_key else 'Non défini'}")
+        print(f"AWS_SECRET_ACCESS_KEY: {secret_key[:4]}...{secret_key[-4:] if secret_key else 'Non défini'}")
+        print(f"S3_BUCKET: {bucket}")
+        print(f"S3_ENDPOINT_URL: {endpoint_url}")
+        print(f"S3_MAKE_PUBLIC: {make_public}")
+        print(f"Fichier à télécharger: {file_path}")
+        print(f"Nom de l'objet S3: {object_name}")
+        
+        # Vérifier que les variables nécessaires sont définies
+        required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET', 'S3_ENDPOINT_URL']
+        missing_vars = [var for var in required_vars if not os.environ.get(var)]
+        
+        if missing_vars:
+            print(f"Erreur: Les variables suivantes sont manquantes: {', '.join(missing_vars)}")
+            print("Vérifiez que ces variables sont définies dans le fichier .env ou comme variables d'environnement.")
+            sys.exit(1)
+        
+        # Afficher toutes les variables d'environnement (pour le débogage)
+        print("DEBUG: Variables d'environnement disponibles:")
+        for key in os.environ.keys():
+            if not key.startswith(('AWS_', 'S3_')):  # Ne pas afficher les clés sensibles
+                print(f"  - {key}")
+        
+        # Configuration pour utiliser la signature S3
+        s3_config = Config(
+            signature_version='s3'  # Utiliser la signature S3
+        )
+        
+        # Créer une session S3
+        s3_client = boto3.client(
+            's3',
+            aws_access_key_id=access_key,
+            aws_secret_access_key=secret_key,
+            endpoint_url=endpoint_url,
+            verify=False,
+            config=s3_config
+        )
+    else:
+        make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
+        print(f"Utilisation des variables S3 passées en paramètres")
+        print(f"Bucket: {bucket}")
+        print(f"Endpoint URL: {endpoint_url}")
+        print(f"Fichier à télécharger: {file_path}")
+        print(f"Nom de l'objet S3: {object_name}")
     
-    # TEMPORAIRE: Afficher les variables pour le débogage
-    print("=== INFORMATIONS DE DÉBOGAGE S3 ===")
-    print(f"AWS_ACCESS_KEY_ID: {access_key[:4]}...{access_key[-4:] if access_key else 'Non défini'}")
-    print(f"AWS_SECRET_ACCESS_KEY: {secret_key[:4]}...{secret_key[-4:] if secret_key else 'Non défini'}")
-    print(f"S3_BUCKET: {bucket}")
-    print(f"S3_ENDPOINT_URL: {endpoint_url}")
-    print(f"S3_MAKE_PUBLIC: {make_public}")
-    print(f"Fichier à télécharger: {file_path}")
-    print(f"Nom de l'objet S3: {object_name}")
-    
-    # Vérifier que les variables nécessaires sont définies
-    required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET', 'S3_ENDPOINT_URL']
-    missing_vars = [var for var in required_vars if not os.environ.get(var)]
-    
-    if missing_vars:
-        print(f"Erreur: Les variables suivantes sont manquantes: {', '.join(missing_vars)}")
-        print("Vérifiez que ces variables sont définies dans le fichier .env ou comme variables d'environnement.")
-        sys.exit(1)
-    
-    # Afficher toutes les variables d'environnement (pour le débogage)
-    print("DEBUG: Variables d'environnement disponibles:")
-    for key in os.environ.keys():
-        if not key.startswith(('AWS_', 'S3_')):  # Ne pas afficher les clés sensibles
-            print(f"  - {key}")
-    
-    # Configuration pour utiliser la signature S3
-    s3_config = Config(
-        signature_version='s3'  # Utiliser la signature S3
-    )
-    
-    # Créer une session S3
-    s3_client = boto3.client(
-        's3',
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        endpoint_url=endpoint_url,
-        verify=False,
-        config=s3_config
-    )
     
     try:
         # # TEMPORAIRE: Afficher la liste des buckets
@@ -460,6 +469,36 @@ def main():
     var_file = sys.argv[2]
     timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     
+    # Récupérer les variables S3 depuis les variables d'environnement
+    access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+    secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    bucket = os.environ.get('S3_BUCKET')
+    endpoint_url = os.environ.get('S3_ENDPOINT_URL')
+    
+    # Vérifier que les variables nécessaires sont définies
+    required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET', 'S3_ENDPOINT_URL']
+    missing_vars = [var for var in required_vars if not os.environ.get(var)]
+    
+    if missing_vars:
+        print(f"Erreur: Les variables suivantes sont manquantes: {', '.join(missing_vars)}")
+        print("Vérifiez que ces variables sont définies dans le fichier .env ou comme variables d'environnement.")
+        sys.exit(1)
+    
+    # Configuration pour utiliser la signature S3
+    s3_config = Config(
+        signature_version='s3'  # Utiliser la signature S3
+    )
+    
+    # Créer une session S3
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        endpoint_url=endpoint_url,
+        verify=False,
+        config=s3_config
+    )
+    
     # Étape 1: Parser le fichier HCL
     hcl_data = parse_hcl_file(template_file)
     
@@ -507,18 +546,18 @@ def main():
     
     # Étape 4: Télécharger le fichier XVA vers S3
     s3_object_name = f"{build_folder}/{os_type}{os_version}-{timestamp}.xva"
-    s3_url = upload_to_s3(xva_file, s3_object_name)
+    s3_url = upload_to_s3(xva_file, s3_object_name, s3_client=s3_client, bucket=bucket, endpoint_url=endpoint_url)
     
     # Étape 5: Générer le fichier de métadonnées
     metadata_file = generate_metadata(template_file, hcl_data, xva_file, s3_url)
     
     # Étape 6: Télécharger le fichier de métadonnées vers S3
     metadata_s3_object = f"{build_folder}/{os_type}{os_version}-{timestamp}-metadata.json"
-    metadata_url = upload_to_s3(metadata_file, metadata_s3_object, content_type='application/json')
+    metadata_url = upload_to_s3(metadata_file, metadata_s3_object, content_type='application/json', s3_client=s3_client, bucket=bucket, endpoint_url=endpoint_url)
     
     # Étape 7: Télécharger le fichier log vers S3
     log_s3_object = f"{build_folder}/{os_type}{os_version}-{timestamp}-build.log"
-    log_url = upload_to_s3(log_file, log_s3_object, content_type='text/plain')
+    log_url = upload_to_s3(log_file, log_s3_object, content_type='text/plain', s3_client=s3_client, bucket=bucket, endpoint_url=endpoint_url)
     
     # Étape 8: Mettre à jour le fichier global de métadonnées
     with open(metadata_file, 'r') as f:
