@@ -152,6 +152,7 @@ build {
       "sudo /tmp/update_system.sh",
       "sudo /tmp/harden_ssh.sh",
       "sudo /tmp/harden_system.sh",
+      "sudo /tmp/setup_motd.sh",
       
       # Scripts spécifiques à Ubuntu
       "sudo /tmp/ubuntu_specific.sh",

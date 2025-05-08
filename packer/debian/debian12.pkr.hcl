@@ -10,13 +10,13 @@ packer {
 variable "template_logo_url" {
   type        = string
   description = "URL du logo du template pour les métadonnées"
-  default     = "https://www.debian.org/Pics/openlogo-50.png"
+  default     = "images/ubuntu.png"
 }
 
 variable "publisher_logo_url" {
   type        = string
   description = "URL du logo du publisher pour les métadonnées"
-  default     = "https://www.cloud-temple.com/wp-content/themes/cloudtemple/assets/images/logos/logo-cloudtemple-footer.svg"
+  default     = "images/cloudtemple.svg"
 }
 
 variable "publisher" {
@@ -137,7 +137,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "packer/debian/common/"
+    source      = "packer/debian/extras/"
     destination = "/tmp/"
   }
 
@@ -150,12 +150,11 @@ build {
       "sudo /tmp/update_system.sh",
       "sudo /tmp/harden_ssh.sh",
       "sudo /tmp/harden_system.sh",
+      "sudo /tmp/setup_motd.sh",
       
       # Scripts spécifiques à Debian
       "sudo /tmp/install_xen_tools.sh",
       "sudo /tmp/debian_specific.sh",
-      
-      # Nettoyage final (commun)
       "sudo /tmp/cleanup.sh",
       
       # Suppression des scripts
