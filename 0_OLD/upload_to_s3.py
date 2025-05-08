@@ -58,7 +58,18 @@ def main():
             config=s3_config  # Ajouter la configuration
         )
     
+
     try:
+        response = s3.list_buckets()
+        print("Buckets disponibles:")
+        for b in response['Buckets']:
+            print(f"  - {b['Name']}")
+    except Exception as e:
+        print(f"Erreur lors de la récupération de la liste des buckets: {e}")
+        exit()
+
+    try:
+
         logger.info(f"Téléchargement de {file_path} vers {bucket}/{object_name}...")
         s3.upload_file(file_path, bucket, object_name)
         logger.info(f"Fichier {file_path} téléchargé avec succès vers {bucket}/{object_name}")
