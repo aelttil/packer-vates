@@ -88,8 +88,6 @@ source "xenserver-iso" "ubuntu24" {
     " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"", "<enter><wait>",
   "<f10>"]
 
-  headless = true
-
   # Change this to match the ISO of ubuntu you are using in the iso_url variable
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-24.04"
