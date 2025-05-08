@@ -86,8 +86,6 @@ source "xenserver-iso" "ubuntu24" {
     "<down><down><down><end><wait>",
     "<bs><bs><bs>",
     " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"",
-    " ip=10.0.0.144::10.0.0.254:255.255.255.0:ubuntu:enX0:off ",
-    " nameserver=10.0.0.1",
     "<enter><wait>",
     "<f10>"
     ]
@@ -154,10 +152,7 @@ build {
       
       # Scripts spécifiques à Ubuntu
       "sudo /tmp/ubuntu_specific.sh",
-      
-      # Nettoyage final (commun)
-      "sudo /tmp/cleanup.sh",
-      
+
       # Suppression des scripts
       "rm -f /tmp/*.sh"
     ]
