@@ -9,6 +9,9 @@ import hcl2
 import boto3
 from botocore.config import Config
 from dotenv import load_dotenv
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 def run_packer(template_file, var_file, log_file):
     """Exécute Packer et capture la sortie dans un fichier log"""

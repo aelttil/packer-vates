@@ -1,5 +1,8 @@
 name: Build and Upload Template
 
+env: 
+  DEBUG_MODE: "true"
+
 on:
   push:
     branches: [ main ]
