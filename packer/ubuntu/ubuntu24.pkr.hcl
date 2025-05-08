@@ -10,13 +10,13 @@ packer {
 variable "template_logo_url" {
   type        = string
   description = "URL du logo du template pour les métadonnées"
-  default     = "https://assets.ubuntu.com/v1/29985a98-ubuntu-logo32.png"
+  default     = "images/ubuntu.png"
 }
 
 variable "publisher_logo_url" {
   type        = string
   description = "URL du logo du publisher pour les métadonnées"
-  default     = "https://www.cloud-temple.com/wp-content/themes/cloudtemple/assets/images/logos/logo-cloudtemple-footer.svg"
+  default     = "images/cloudtemple.svg"
 }
 
 variable "publisher" {
@@ -110,8 +110,11 @@ source "xenserver-iso" "ubuntu24" {
 
   ssh_username            = "admct"
   ssh_password            = "InitCT@2025"
+  ssh_host                = "10.0.0.144"
+  ssh_port                = 22
   ssh_wait_timeout        = "60000s"
   ssh_handshake_attempts  = 10000
+  ssh_extra_args          = ["-o", "StrictHostKeyChecking=no", "-o", "UserKnownHostsFile=/dev/null"]
 
   output_directory = "packer-template-ubuntu-24.04"
   
