@@ -7,7 +7,6 @@ on:
       - 'packer/ubuntu/**'
       - 'packer/common/**'
       - '.github/workflows/build-ubuntu24.yml'
-      - 'process_template.py'
   pull_request:
     branches: [ main ]
   # Permettre le déclenchement manuel

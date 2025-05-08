@@ -1,6 +1,12 @@
 #cloud-config
 autoinstall:
   version: 1
+  early-commands:
+    # Désactiver la mise à jour des paquets pendant l'installation
+    - systemctl stop apt-daily.service
+    - systemctl stop apt-daily.timer
+    - systemctl stop apt-daily-upgrade.service
+    - systemctl stop apt-daily-upgrade.timer
   locale: en_US.UTF-8
   keyboard:
     layout: us
@@ -197,3 +203,14 @@ autoinstall:
   late-commands:
     - echo 'admct ALL=(ALL) NOPASSWD:ALL' > /target/etc/sudoers.d/admct
     - chmod 440 /target/etc/sudoers.d/admct
+    - sed -i 's/^#*\(PermitRootLogin\) .*/\1 no/' /target/etc/ssh/sshd_config
+    - sed -i 's/^#*\(PasswordAuthentication\) .*/\1 yes/' /target/etc/ssh/sshd_config
+  # Éviter les interactions utilisateur
+  interactive-sections:
+    - locale
+    - keyboard
+    - network
+    - storage
+    - identity
+  refresh-installer:
+    update: no

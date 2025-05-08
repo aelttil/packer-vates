@@ -287,581 +287,6 @@ def cleanup_local_files(log_file, metadata_file, output_dir):
         shutil.rmtree(output_dir)
         print(f"Répertoire de sortie supprimé: {output_dir}")
 
-def generate_html_viewer(bucket, s3_client, endpoint_url):
-    """Génère et télécharge un fichier HTML pour visualiser les templates"""
-    print("Génération du fichier HTML pour visualiser les templates...")
-    
-    # Contenu du fichier HTML
-    html_content = """<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Temple - Catalogue de Templates</title>
-    <style>
-        :root {
-            --primary-color: #0056b3;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --info-color: #17a2b8;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --light-color: #f8f9fa;
-            --dark-color: #343a40;
-            --white-color: #ffffff;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --border-radius: 4px;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--dark-color);
-            background-color: var(--light-color);
-            padding: 20px;
-        }
-        
-        header {
-            background-color: var(--white-color);
-            padding: 20px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        header h1 {
-            color: var(--primary-color);
-            font-size: 24px;
-        }
-        
-        .logo {
-            height: 40px;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .os-section {
-            background-color: var(--white-color);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        
-        .os-header {
-            background-color: var(--primary-color);
-            color: var(--white-color);
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-        }
-        
-        .os-header img {
-            height: 30px;
-            margin-right: 15px;
-        }
-        
-        .os-header h2 {
-            font-size: 20px;
-            margin: 0;
-        }
-        
-        .os-content {
-            padding: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-        
-        .os-content.active {
-            max-height: 2000px;
-            padding: 20px;
-        }
-        
-        .version-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--secondary-color);
-            margin-bottom: 20px;
-        }
-        
-        .version-tab {
-            padding: 10px 20px;
-            cursor: pointer;
-            border: 1px solid transparent;
-            border-bottom: none;
-            margin-right: 5px;
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
-        }
-        
-        .version-tab.active {
-            background-color: var(--white-color);
-            border-color: var(--secondary-color);
-            border-bottom-color: var(--white-color);
-            color: var(--primary-color);
-            font-weight: bold;
-        }
-        
-        .version-content {
-            display: none;
-        }
-        
-        .version-content.active {
-            display: block;
-        }
-        
-        .template-card {
-            background-color: var(--white-color);
-            border: 1px solid #ddd;
-            border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .template-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .template-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-        
-        .template-date {
-            color: var(--secondary-color);
-            font-size: 14px;
-        }
-        
-        .template-info {
-            display: flex;
-            margin-bottom: 15px;
-        }
-        
-        .template-logo {
-            width: 80px;
-            height: 80px;
-            object-fit: contain;
-            margin-right: 20px;
-        }
-        
-        .template-details {
-            flex: 1;
-        }
-        
-        .template-description {
-            margin-bottom: 10px;
-        }
-        
-        .template-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        
-        .template-meta-item {
-            background-color: var(--light-color);
-            padding: 5px 10px;
-            border-radius: var(--border-radius);
-            font-size: 14px;
-        }
-        
-        .template-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-        
-        .template-tag {
-            background-color: var(--info-color);
-            color: var(--white-color);
-            padding: 3px 8px;
-            border-radius: var(--border-radius);
-            font-size: 12px;
-        }
-        
-        .template-actions {
-            display: flex;
-            justify-content: flex-end;
-        }
-        
-        .btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            margin-left: 10px;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: var(--white-color);
-        }
-        
-        .btn-secondary {
-            background-color: var(--secondary-color);
-            color: var(--white-color);
-        }
-        
-        .btn-info {
-            background-color: var(--info-color);
-            color: var(--white-color);
-        }
-        
-        .btn i {
-            margin-right: 5px;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: var(--secondary-color);
-        }
-        
-        .error {
-            background-color: var(--danger-color);
-            color: var(--white-color);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            margin-bottom: 20px;
-        }
-        
-        .publisher-info {
-            display: flex;
-            align-items: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #eee;
-        }
-        
-        .publisher-logo {
-            height: 30px;
-            margin-right: 10px;
-        }
-        
-        .publisher-name {
-            font-weight: bold;
-        }
-        
-        @media (max-width: 768px) {
-            .template-info {
-                flex-direction: column;
-            }
-            
-            .template-logo {
-                margin-right: 0;
-                margin-bottom: 15px;
-            }
-            
-            .template-actions {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .btn {
-                margin-left: 0;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>Cloud Temple - Catalogue de Templates</h1>
-            <img src="https://www.cloud-temple.com/wp-content/themes/cloudtemple/assets/images/logos/logo-cloudtemple.svg" alt="Cloud Temple Logo" class="logo">
-        </header>
-        
-        <div id="content">
-            <div class="loading">Chargement des templates...</div>
-        </div>
-    </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Charger le fichier JSON
-            fetch('template-os-metadata.json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erreur lors du chargement des données: ' + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    displayTemplates(data);
-                })
-                .catch(error => {
-                    document.getElementById('content').innerHTML = `
-                        <div class="error">
-                            ${error.message}
-                        </div>
-                    `;
-                });
-        });
-        
-        function displayTemplates(data) {
-            const contentElement = document.getElementById('content');
-            let html = '';
-            
-            // Trier les OS par nom
-            const sortedOS = Object.keys(data).sort();
-            
-            if (sortedOS.length === 0) {
-                html = '<div class="error">Aucun template disponible</div>';
-            } else {
-                sortedOS.forEach(os => {
-                    const osData = data[os];
-                    const versions = Object.keys(osData).sort((a, b) => parseInt(b) - parseInt(a)); // Trier par version décroissante
-                    
-                    html += `
-                        <div class="os-section">
-                            <div class="os-header" onclick="toggleOSContent(this.parentNode)">
-                                <img src="https://www.${os}.org/logos/logo-${os}.png" alt="${os} Logo" onerror="this.src='https://via.placeholder.com/30x30?text=${os}'">
-                                <h2>${os.charAt(0).toUpperCase() + os.slice(1)}</h2>
-                            </div>
-                            <div class="os-content">
-                                <div class="version-tabs">
-                    `;
-                    
-                    versions.forEach((version, index) => {
-                        html += `
-                            <div class="version-tab ${index === 0 ? 'active' : ''}" 
-                                 onclick="switchVersionTab(this, '${os}-${version}')">${version}</div>
-                        `;
-                    });
-                    
-                    html += `
-                                </div>
-                    `;
-                    
-                    versions.forEach((version, index) => {
-                        const templates = osData[version];
-                        
-                        html += `
-                            <div id="${os}-${version}" class="version-content ${index === 0 ? 'active' : ''}">
-                        `;
-                        
-                        // Trier les templates par date de publication (du plus récent au plus ancien)
-                        templates.sort((a, b) => {
-                            const dateA = new Date(a.release_date);
-                            const dateB = new Date(b.release_date);
-                            return dateB - dateA;
-                        });
-                        
-                        templates.forEach(template => {
-                            const timestamp = template.timestamp || '';
-                            const releaseDate = new Date(template.release_date).toLocaleDateString('fr-FR');
-                            
-                            html += `
-                                <div class="template-card">
-                                    <div class="template-header">
-                                        <div class="template-title">${template.name}</div>
-                                        <div class="template-date">Publié le ${releaseDate}</div>
-                                    </div>
-                                    <div class="template-info">
-                                        <img src="${template.template_logo_url}" alt="${template.os} Logo" class="template-logo" 
-                                             onerror="this.src='https://via.placeholder.com/80x80?text=${template.os}'">
-                                        <div class="template-details">
-                                            <div class="template-description">${template.description}</div>
-                                            <div class="template-meta">
-                                                <div class="template-meta-item">Version: ${template.version}</div>
-                                                <div class="template-meta-item">Plateforme: ${template.target_platform}</div>
-                                            </div>
-                                            <div class="template-tags">
-                            `;
-                            
-                            template.tags.forEach(tag => {
-                                html += `<div class="template-tag">${tag}</div>`;
-                            });
-                            
-                            html += `
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="publisher-info">
-                                        <img src="${template.publisher_logo_url}" alt="${template.publisher} Logo" class="publisher-logo"
-                                             onerror="this.src='https://via.placeholder.com/30x30?text=${template.publisher}'">
-                                        <div class="publisher-name">${template.publisher}</div>
-                                    </div>
-                                    <div class="template-actions">
-                                        <a href="${template.files[0]}" class="btn btn-primary" download>
-                                            <i>⬇️</i> Télécharger XVA
-                                        </a>
-                                        <a href="${template.files[0].replace('.xva', '-metadata.json')}" class="btn btn-info" target="_blank">
-                                            <i>ℹ️</i> Voir Métadonnées
-                                        </a>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        
-                        html += `
-                            </div>
-                        `;
-                    });
-                    
-                    html += `
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-            
-            contentElement.innerHTML = html;
-            
-            // Ouvrir la première section OS par défaut
-            if (sortedOS.length > 0) {
-                const firstOSSection = document.querySelector('.os-section');
-                toggleOSContent(firstOSSection);
-            }
-        }
-        
-        function toggleOSContent(section) {
-            const content = section.querySelector('.os-content');
-            content.classList.toggle('active');
-        }
-        
-        function switchVersionTab(tab, versionId) {
-            // Désactiver tous les onglets dans le même groupe
-            const tabs = tab.parentNode.querySelectorAll('.version-tab');
-            tabs.forEach(t => t.classList.remove('active'));
-            
-            // Activer l'onglet cliqué
-            tab.classList.add('active');
-            
-            // Masquer tous les contenus de version dans la même section
-            const osContent = tab.closest('.os-content');
-            const versionContents = osContent.querySelectorAll('.version-content');
-            versionContents.forEach(c => c.classList.remove('active'));
-            
-            // Afficher le contenu de version correspondant
-            document.getElementById(versionId).classList.add('active');
-        }
-    </script>
-</body>
-</html>
-"""
-    
-    # Créer un fichier temporaire pour le HTML
-    with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
-        temp_file.write(html_content)
-        temp_file_path = temp_file.name
-    
-    # Télécharger le fichier HTML vers S3
-    html_key = "index.html"
-    
-    try:
-        # Télécharger le fichier avec l'accès public
-        s3_client.upload_file(
-            temp_file_path, 
-            bucket, 
-            html_key,
-            ExtraArgs={
-                'ContentType': 'text/html',
-                'ACL': 'public-read'
-            }
-        )
-        
-        # Supprimer le fichier temporaire
-        os.remove(temp_file_path)
-        
-        html_url = f"{endpoint_url}/{bucket}/{html_key}"
-        print(f"Fichier HTML généré et téléchargé: {html_url}")
-        return html_url
-    
-    except Exception as e:
-        print(f"Erreur lors de la génération du fichier HTML: {e}")
-        if os.path.exists(temp_file_path):
-            os.remove(temp_file_path)
-        return None
-
-def update_global_metadata(bucket, s3_client, endpoint_url, metadata, os_type, os_version, timestamp):
-    """Met à jour le fichier global de métadonnées à la racine du bucket S3"""
-    global_metadata_key = "template-os-metadata.json"
-    
-    # Ajouter le timestamp aux métadonnées
-    metadata_copy = metadata.copy()
-    metadata_copy["timestamp"] = timestamp
-    
-    try:
-        # Vérifier si le fichier existe
-        try:
-            response = s3_client.get_object(Bucket=bucket, Key=global_metadata_key)
-            global_metadata = json.loads(response['Body'].read().decode('utf-8'))
-            print(f"Fichier global de métadonnées existant trouvé: {global_metadata_key}")
-        except Exception as e:
-            print(f"Le fichier global de métadonnées n'existe pas, création d'un nouveau fichier: {e}")
-            global_metadata = {}
-        
-        # S'assurer que la structure existe
-        if os_type not in global_metadata:
-            global_metadata[os_type] = {}
-        
-        if os_version not in global_metadata[os_type]:
-            global_metadata[os_type][os_version] = []
-        
-        # Ajouter les nouvelles métadonnées
-        global_metadata[os_type][os_version].append(metadata_copy)
-        
-        # Créer un fichier temporaire
-        with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_file:
-            json.dump(global_metadata, temp_file, indent=2)
-            temp_file_path = temp_file.name
-        
-        # Vérifier si le fichier doit être rendu public
-        make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
-        
-        # Préparer les arguments supplémentaires
-        extra_args = {
-            'ContentType': 'application/json'
-        }
-        
-        # Ajouter l'ACL si demandé ou toujours pour le fichier global de métadonnées
-        # Le fichier global de métadonnées est toujours rendu public pour être accessible via un navigateur
-        extra_args['ACL'] = 'public-read'
-        
-        # Télécharger le fichier mis à jour
-        s3_client.upload_file(
-            temp_file_path, 
-            bucket, 
-            global_metadata_key,
-            ExtraArgs=extra_args
-        )
-        
-        # Supprimer le fichier temporaire
-        os.remove(temp_file_path)
-        
-        print(f"Fichier global de métadonnées mis à jour: {global_metadata_key}")
-        return f"{endpoint_url}/{bucket}/{global_metadata_key}"
-    
-    except Exception as e:
-        print(f"Erreur lors de la mise à jour du fichier global de métadonnées: {e}")
-        return None
-
 def upload_to_s3(file_path, object_name, content_type=None, s3_client=None, bucket=None, endpoint_url=None):
     """Télécharge un fichier vers S3 et retourne l'URL"""
     print(f"Téléchargement de {file_path} vers S3...")
@@ -872,15 +297,13 @@ def upload_to_s3(file_path, object_name, content_type=None, s3_client=None, buck
         secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
         bucket = os.environ.get('S3_BUCKET')
         endpoint_url = os.environ.get('S3_ENDPOINT_URL')
-        make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
         
-        # TEMPORAIRE: Afficher les variables pour le débogage
+        # Afficher les variables pour le débogage
         print("=== INFORMATIONS DE DÉBOGAGE S3 ===")
         print(f"AWS_ACCESS_KEY_ID: {access_key[:4]}...{access_key[-4:] if access_key else 'Non défini'}")
         print(f"AWS_SECRET_ACCESS_KEY: {secret_key[:4]}...{secret_key[-4:] if secret_key else 'Non défini'}")
         print(f"S3_BUCKET: {bucket}")
         print(f"S3_ENDPOINT_URL: {endpoint_url}")
-        print(f"S3_MAKE_PUBLIC: {make_public}")
         print(f"Fichier à télécharger: {file_path}")
         print(f"Nom de l'objet S3: {object_name}")
         
@@ -892,12 +315,6 @@ def upload_to_s3(file_path, object_name, content_type=None, s3_client=None, buck
             print(f"Erreur: Les variables suivantes sont manquantes: {', '.join(missing_vars)}")
             print("Vérifiez que ces variables sont définies dans le fichier .env ou comme variables d'environnement.")
             sys.exit(1)
-        
-        # Afficher toutes les variables d'environnement (pour le débogage)
-        print("DEBUG: Variables d'environnement disponibles:")
-        for key in os.environ.keys():
-            if not key.startswith(('AWS_', 'S3_')):  # Ne pas afficher les clés sensibles
-                print(f"  - {key}")
         
         # Configuration pour utiliser la signature S3
         s3_config = Config(
@@ -914,48 +331,21 @@ def upload_to_s3(file_path, object_name, content_type=None, s3_client=None, buck
             config=s3_config
         )
     else:
-        make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
         print(f"Utilisation des variables S3 passées en paramètres")
         print(f"Bucket: {bucket}")
         print(f"Endpoint URL: {endpoint_url}")
         print(f"Fichier à télécharger: {file_path}")
         print(f"Nom de l'objet S3: {object_name}")
     
-    
     try:
-        # # TEMPORAIRE: Afficher la liste des buckets
-        # try:
-        #     response = s3_client.list_buckets()
-        #     print("Buckets disponibles:")
-        #     for b in response['Buckets']:
-        #         print(f"  - {b['Name']}")
-        # except Exception as e:
-        #     print(f"Erreur lors de la récupération de la liste des buckets: {e}")
-        
-        # # Vérifier si le bucket existe
-        # try:
-        #     print(f"Vérification de l'existence du bucket {bucket}...")
-        #     s3_client.head_bucket(Bucket=bucket)
-        #     print(f"Le bucket {bucket} existe et est accessible.")
-        # except Exception as e:
-        #     print(f"Erreur: Le bucket {bucket} n'existe pas ou n'est pas accessible: {e}")
-            
-        #     # TEMPORAIRE: Essayer de créer le bucket
-        #     try:
-        #         print(f"Tentative de création du bucket {bucket}...")
-        #         s3_client.create_bucket(Bucket=bucket)
-        #         print(f"Bucket {bucket} créé avec succès.")
-        #     except Exception as create_error:
-        #         print(f"Erreur lors de la création du bucket: {create_error}")
-        #         sys.exit(1)
-        
         # Préparer les arguments supplémentaires
         extra_args = {}
         if content_type:
             extra_args['ContentType'] = content_type
         
-        # Toujours configurer l'accès public en lecture
+        # Toujours configurer l'accès public en lecture et la visualisation en ligne
         extra_args['ACL'] = 'public-read'
+        extra_args['ContentDisposition'] = 'inline'
         
         # Télécharger le fichier
         print(f"Téléchargement du fichier {file_path} vers {bucket}/{object_name}...")
@@ -963,7 +353,7 @@ def upload_to_s3(file_path, object_name, content_type=None, s3_client=None, buck
         print("Téléchargement réussi.")
         print("Accès public configuré.")
         
-        # Générer l'URL publique (uniquement avec l'endpoint URL spécifié)
+        # Générer l'URL publique
         public_url = f"{endpoint_url}/{bucket}/{object_name}"
         
         print(f"Fichier téléchargé avec succès: {public_url}")
@@ -1066,30 +456,27 @@ def main():
     
     # Étape 6: Télécharger le fichier de métadonnées vers S3
     metadata_s3_object = f"{build_folder}/{os_type}{os_version}-{timestamp}-metadata.json"
-    metadata_url = upload_to_s3(metadata_file, metadata_s3_object, content_type='application/json', s3_client=s3_client, bucket=bucket, endpoint_url=endpoint_url)
+    metadata_url = upload_to_s3(
+        metadata_file, 
+        metadata_s3_object, 
+        content_type='application/json; charset=utf-8', 
+        s3_client=s3_client, 
+        bucket=bucket, 
+        endpoint_url=endpoint_url
+    )
     
     # Étape 7: Télécharger le fichier log vers S3
     log_s3_object = f"{build_folder}/{os_type}{os_version}-{timestamp}-build.log"
-    log_url = upload_to_s3(log_file, log_s3_object, content_type='text/plain', s3_client=s3_client, bucket=bucket, endpoint_url=endpoint_url)
-    
-    # Étape 8: Mettre à jour le fichier global de métadonnées
-    with open(metadata_file, 'r') as f:
-        metadata_content = json.load(f)
-    
-    global_metadata_url = update_global_metadata(
-        bucket, 
-        s3_client, 
-        endpoint_url, 
-        metadata_content, 
-        os_type, 
-        os_version, 
-        timestamp
+    log_url = upload_to_s3(
+        log_file, 
+        log_s3_object, 
+        content_type='text/plain; charset=utf-8', 
+        s3_client=s3_client, 
+        bucket=bucket, 
+        endpoint_url=endpoint_url
     )
     
-    # Étape 9: Générer et télécharger le fichier HTML pour visualiser les templates
-    html_url = generate_html_viewer(bucket, s3_client, endpoint_url)
-    
-    # Étape 10: Nettoyer les fichiers locaux
+    # Étape 8: Nettoyer les fichiers locaux
     cleanup_local_files(log_file, metadata_file, output_dir)
     
     print("\n=== Processus terminé avec succès ===")
@@ -1097,8 +484,6 @@ def main():
     print(f"Fichier XVA: {s3_url}")
     print(f"Métadonnées: {metadata_url}")
     print(f"Log: {log_url}")
-    print(f"Fichier global de métadonnées: {global_metadata_url}")
-    print(f"Visualisation HTML: {html_url}")
     print(f"Les fichiers locaux ont été nettoyés")
 
 if __name__ == "__main__":

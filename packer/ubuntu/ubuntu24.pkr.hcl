@@ -80,21 +80,17 @@ source "xenserver-iso" "ubuntu24" {
 
   http_directory = "packer/ubuntu/http"
 
-  boot_command = [
-    "<wait>",
-    "c",
-    "<wait>",
-    "linux /casper/vmlinuz --- autoinstall ds=nocloud;s=/cdrom/nocloud/ ",
-    "<enter><wait>",
-    "initrd /casper/initrd",
-    "<enter><wait>",
-    "boot<enter>"
-  ]
+  boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
+    "e<wait>",
+    "<down><down><down><end><wait>",
+    "<bs><bs><bs>",
+    " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"", "<enter><wait>",
+  "<f10>"]
 
   # Change this to match the ISO of ubuntu you are using in the iso_url variable
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-24.04"
-  vm_description = "Template Ubuntu 24.04 LTS (Noble Numbat)"
+  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template for automation. \nDefault login: `admct` \nDefault password `InitCT@2025`."
   vcpus_max      = 4
   vcpus_atstartup = 2
   vm_memory      = 4096 #MB
@@ -113,7 +109,7 @@ source "xenserver-iso" "ubuntu24" {
   # keep_vm = "on-success"__: Conserve la VM si le build réussit (idéal pour les tests)
   # keep_vm = "on-failure"__: Conserve la VM uniquement si le build échoue (utile pour déboguer)
   # keep_vm = "always"__: Conserve toujours la VM, quel que soit le résultat du build
-  keep_vm          = "never"
+  keep_vm          = "on-failure"
   format = "xva_compressed"
 }
 
