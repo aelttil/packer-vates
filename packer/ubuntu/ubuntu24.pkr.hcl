@@ -113,11 +113,14 @@ source "xenserver-iso" "ubuntu24" {
 
   ssh_username            = "admct"
   ssh_password            = "InitCT@2025"
-  ssh_host                = "10.0.0.144"
-  ssh_port                = 22
+
+  # ssh_host                = "10.0.0.144"
+  # ssh_port                = 22
+
   ssh_wait_timeout        = "60000s"
   ssh_handshake_attempts  = 10000
-  ssh_skip_nat_mapping    = true
+
+  # ssh_skip_nat_mapping    = true
   communicator = "ssh"
   output_directory = "packer-template-ubuntu-24.04"
   pause_before_connecting = "60s"

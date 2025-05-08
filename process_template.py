@@ -260,7 +260,7 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
         "publisher_logo_url": publisher_logo_url,
         "publisher": publisher,
         "tags": vm_tags,
-        "release_date": datetime.datetime.now().strftime("%Y-%m-%d")
+        "release_date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     }
     
     metadata_file = f"metadata-{os_type}{os_version}-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}.json"

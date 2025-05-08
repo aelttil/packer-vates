@@ -3,18 +3,6 @@ set -e
 
 echo "Application des configurations spécifiques à Ubuntu..."
 
-echo "Nettoyage du système et configuration DHCP..."
-
-# Configuration de l'interface réseau en DHCP
-echo "Configuration de l'interface réseau en DHCP..."
-cat > /etc/netplan/50-cloud-init.yaml << EOF
-network:
-  version: 2
-  ethernets:
-    enX0:
-      dhcp4: true
-EOF
-
 # Configuration d'APT
 cat > /etc/apt/apt.conf.d/99custom << EOF
 APT::Get::Assume-Yes "true";
