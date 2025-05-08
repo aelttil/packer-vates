@@ -26,7 +26,7 @@ def run_packer(template_file, var_file, log_file):
     except subprocess.CalledProcessError as e:
         print(f"Avertissement: Impossible de réinitialiser le fichier ~/.ssh/known_hosts: {e}")
     
-    cmd = ["packer", "build", "-debug", "-var-file=" + var_file, template_file]
+    cmd = ["packer", "build", "-var-file=" + var_file, template_file]
     
     # Créer une copie de l'environnement actuel et ajouter PACKER_LOG=1
     env = os.environ.copy()
