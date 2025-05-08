@@ -79,24 +79,22 @@ source "xenserver-iso" "ubuntu24" {
   remote_username = var.remote_username
 
   http_directory = "packer/ubuntu/http"
-  boot_wait            = "20s"
+  boot_wait      = "10s"
 
-  floppy_files = [
-    "packer/ubuntu/http/meta-data",
-    "packer/ubuntu/http/user-data",
+  # Commandes de démarrage spécifiques à Ubuntu 24.04
+  boot_command = [
+    "c",
+    "linux /casper/vmlinuz --- autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/",
+    "<enter>",
+    "initrd /casper/initrd",
+    "<enter>",
+    "boot",
+    "<enter>"
   ]
 
-  # boot_command = ["<spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait><spacebar><wait>",
-  #   "e<wait>",
-  #   "<down><down><down><end><wait>",
-  #   "<bs><bs><bs>",
-  #   " autoinstall ds=\"nocloud;seedfrom=http://10.0.0.143:{{ .HTTPPort }}/\"", "<enter><wait>",
-  # "<f10>"]
-
-  # Change this to match the ISO of ubuntu you are using in the iso_url variable
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-24.04"
-  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template for automation. Default login: `admct` Default password `InitCT@2025`."
+  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template"
   vcpus_max      = 4
   vcpus_atstartup = 2
   vm_memory      = 4096 #MB
@@ -111,11 +109,8 @@ source "xenserver-iso" "ubuntu24" {
   ssh_handshake_attempts  = 10000
 
   output_directory = "packer-template-ubuntu-24.04"
-
-  # keep_vm = "on-success"__: Conserve la VM si le build réussit (idéal pour les tests)
-  # keep_vm = "on-failure"__: Conserve la VM uniquement si le build échoue (utile pour déboguer)
-  # keep_vm = "always"__: Conserve toujours la VM, quel que soit le résultat du build
   
+  # Conserver la VM en cas d'échec pour faciliter le débogage
   keep_vm          = "never"
   format = "xva_compressed"
 }
