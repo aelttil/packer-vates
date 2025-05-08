@@ -1,8 +1,5 @@
 name: Build and Upload Template
 
-env: 
-  DEBUG_MODE: "true"
-
 on:
   push:
     branches: [ main ]
@@ -67,6 +64,11 @@ jobs:
           cd ../..
 
       - name: Process template
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
         run: |
           TEMPLATE="${{ github.event.inputs.template || 'debian12' }}"
           python3 process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl

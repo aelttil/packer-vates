@@ -252,20 +252,20 @@ def upload_to_s3(file_path, object_name):
     """Télécharge un fichier vers S3 et retourne l'URL"""
     print(f"Téléchargement de {file_path} vers S3...")
     
-    # Charger les variables d'environnement
-    load_dotenv()
+    # Charger les variables d'environnement (essayer les deux méthodes)
+    load_dotenv(dotenv_path=".env")
     
-    # Récupérer les variables depuis le fichier .env
-    access_key = os.getenv('AWS_ACCESS_KEY_ID')
-    secret_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-    bucket = os.getenv('S3_BUCKET')
-    endpoint_url = os.getenv('S3_ENDPOINT_URL')
-    make_public = os.getenv('S3_MAKE_PUBLIC', 'false').lower() == 'true'
+    # Récupérer les variables depuis le fichier .env ou directement des variables d'environnement
+    access_key = os.environ.get('AWS_ACCESS_KEY_ID')
+    secret_key = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    bucket = os.environ.get('S3_BUCKET')
+    endpoint_url = os.environ.get('S3_ENDPOINT_URL')
+    make_public = os.environ.get('S3_MAKE_PUBLIC', 'false').lower() == 'true'
     
     # TEMPORAIRE: Afficher les variables pour le débogage
     print("=== INFORMATIONS DE DÉBOGAGE S3 ===")
-    print(f"AWS_ACCESS_KEY_ID: {access_key}")
-    print(f"AWS_SECRET_ACCESS_KEY: {secret_key}")
+    print(f"AWS_ACCESS_KEY_ID: {access_key[:4]}...{access_key[-4:] if access_key else 'Non défini'}")
+    print(f"AWS_SECRET_ACCESS_KEY: {secret_key[:4]}...{secret_key[-4:] if secret_key else 'Non défini'}")
     print(f"S3_BUCKET: {bucket}")
     print(f"S3_ENDPOINT_URL: {endpoint_url}")
     print(f"S3_MAKE_PUBLIC: {make_public}")
@@ -274,15 +274,22 @@ def upload_to_s3(file_path, object_name):
     
     # Vérifier que les variables nécessaires sont définies
     required_vars = ['AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'S3_BUCKET', 'S3_ENDPOINT_URL']
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    missing_vars = [var for var in required_vars if not os.environ.get(var)]
     
     if missing_vars:
-        print(f"Erreur: Les variables suivantes sont manquantes dans le fichier .env: {', '.join(missing_vars)}")
+        print(f"Erreur: Les variables suivantes sont manquantes: {', '.join(missing_vars)}")
+        print("Vérifiez que ces variables sont définies dans le fichier .env ou comme variables d'environnement.")
         sys.exit(1)
     
-    # Configuration pour utiliser la signature S3 au lieu de SigV4
+    # Afficher toutes les variables d'environnement (pour le débogage)
+    print("DEBUG: Variables d'environnement disponibles:")
+    for key in os.environ.keys():
+        if not key.startswith(('AWS_', 'S3_')):  # Ne pas afficher les clés sensibles
+            print(f"  - {key}")
+    
+    # Configuration pour utiliser la signature S3
     s3_config = Config(
-        signature_version='s3'  # Utiliser la signature S3 au lieu de SigV4
+        signature_version='s3'  # Utiliser la signature S3
     )
     
     # Créer une session S3
