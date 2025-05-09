@@ -92,7 +92,7 @@ source "xenserver-iso" "ubuntu22" {
 
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-22.04"
-  vm_description = "Ubuntu 22.04 LTS (Jammy Jellyfish) cloud-init-ready template. Default login : 'admct'. Default password: 'InitCT@2025'"
+  vm_description = "Ubuntu 22.04 LTS (Jammy Jellyfish) cloud-init-ready template. \nDefault login : 'admct'. \nDefault password: 'InitCT@2025'"
   vcpus_max      = 4
   vcpus_atstartup = 2
   vm_memory      = 4096 #MB

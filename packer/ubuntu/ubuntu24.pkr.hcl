@@ -102,7 +102,7 @@ source "xenserver-iso" "ubuntu24" {
 
   clone_template = "Generic Linux BIOS"
   vm_name        = "template-ubuntu-24.04"
-  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template. Default login : 'admct'. Default password: 'InitCT@2025'"
+  vm_description = "Ubuntu 24.04 LTS (Noble Numbat) cloud-init-ready template. \nDefault login : 'admct'. \nDefault password: 'InitCT@2025'"
   vcpus_max      = 4
   vcpus_atstartup = 2
   vm_memory      = 4096 #MB

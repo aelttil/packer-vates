@@ -366,8 +366,42 @@
                 });
         });
         
+        // Function to search products by text
+        function searchProducts(searchText) {
+            // Convert search text to lowercase for case-insensitive comparison
+            const searchLower = searchText.toLowerCase();
+            
+            // If search field is empty, display all products
+            if (searchLower === '') {
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.style.display = 'flex';
+                });
+                return;
+            }
+            
+            // Otherwise, filter products based on search text
+            document.querySelectorAll('.product-card').forEach(card => {
+                // Search in product name, description and OS
+                const productName = card.querySelector('.product-name').textContent.toLowerCase();
+                const productDescription = card.querySelector('.product-description').textContent.toLowerCase();
+                const productOS = card.querySelector('.product-logo').alt.toLowerCase();
+                
+                // Display product if search text is found in any of the fields
+                if (productName.includes(searchLower) || 
+                    productDescription.includes(searchLower) || 
+                    productOS.includes(searchLower)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
         // Function to filter products by category
         function filterProducts(category) {
+            // Reset search field
+            document.querySelector('.search-input').value = '';
+            
             // If category is "all", display all products
             if (category === 'all') {
                 document.querySelectorAll('.product-card').forEach(card => {
@@ -437,6 +471,20 @@
                     // Filter products
                     filterProducts(category);
                 });
+            });
+            
+            // Add event listener for search input
+            const searchInput = document.querySelector('.search-input');
+            searchInput.addEventListener('input', function() {
+                // Reset active category to "All products"
+                document.querySelectorAll('.sidebar-menu-item').forEach(i => i.classList.remove('active'));
+                document.querySelector('[data-category="all"]').classList.add('active');
+                
+                // Update page title
+                document.querySelector('.page-title').textContent = this.value ? "Search Results" : "All products";
+                
+                // Filter products based on search text
+                searchProducts(this.value);
             });
         }
     </script>
