@@ -79,7 +79,7 @@ source "xenserver-iso" "opnsense" {
   remote_username = var.remote_username
 
   http_directory = "packer/opnsense/http"
-  boot_wait      = "5s"
+  boot_wait      = "30s"
 
   # Ces commandes de démarrage sont spécifiques à OPNsense et devront être ajustées
   boot_command = [
