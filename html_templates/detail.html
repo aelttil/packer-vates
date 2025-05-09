@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Temple - Détails du template</title>
+    <title>Cloud Temple - Template Details</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -364,9 +364,11 @@
 </head>
 <body>
     <header>
-        <h1 class="marketplace-title">Cloud Temple Marketplace</h1>
+        <a href="index.html" style="text-decoration: none;">
+            <h1 class="marketplace-title">Cloud Temple Marketplace</h1>
+        </a>
         <div class="search-container">
-            <input type="text" class="search-input" placeholder="Rechercher dans le Marketplace">
+            <input type="text" class="search-input" placeholder="Search in Marketplace">
         </div>
         <img src="images/cloudtemple.svg" alt="Cloud Temple Logo" class="logo">
     </header>
@@ -375,43 +377,43 @@
         <aside class="sidebar">
             <h2 class="sidebar-title">Navigation</h2>
             <ul class="sidebar-menu">
-                <li class="sidebar-menu-item"><a href="index.html">Retour à la liste</a></li>
+                <li class="sidebar-menu-item"><a href="index.html">Back to list</a></li>
             </ul>
         </aside>
         
         <main class="main-content">
             <div id="template-details">
-                <div class="loading">Chargement des détails...</div>
+                <div class="loading">Loading details...</div>
             </div>
             
-            <h2 class="section-title">Historique des versions</h2>
-            <div id="template-history">
-                <div class="loading">Chargement de l'historique...</div>
-            </div>
-            
-            <h2 class="section-title">Fichiers associés</h2>
+            <h2 class="section-title">Associated Files</h2>
             <div id="template-files">
-                <div class="loading">Chargement des fichiers...</div>
+                <div class="loading">Loading files...</div>
+            </div>
+            
+            <h2 class="section-title">Version History</h2>
+            <div id="template-history">
+                <div class="loading">Loading history...</div>
             </div>
         </main>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Récupérer le paramètre OS de l'URL
+            // Get OS parameter from URL
             const urlParams = new URLSearchParams(window.location.search);
             const os = urlParams.get('os');
             
             if (!os) {
-                document.getElementById('template-details').innerHTML = '<div class="error">Erreur: Système d\'exploitation non spécifié</div>';
+                document.getElementById('template-details').innerHTML = '<div class="error">Error: Operating system not specified</div>';
                 return;
             }
             
-            // Charger le fichier JSON
+            // Load JSON file
             fetch('global_summary.json')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Erreur lors du chargement des données: ' + response.status);
+                        throw new Error('Error loading data: ' + response.status);
                     }
                     return response.json();
                 })
@@ -421,32 +423,32 @@
                 .catch(error => {
                     document.getElementById('template-details').innerHTML = `
                         <div class="error">
-                            <p>Erreur: ${error.message}</p>
+                            <p>Error: ${error.message}</p>
                         </div>
                     `;
                 });
         });
         
         function displayTemplateDetails(data, os) {
-            // Trouver les données du système d'exploitation spécifié
+            // Find data for the specified operating system
             const osData = data.operating_systems.find(item => item.os === os);
             
             if (!osData) {
                 document.getElementById('template-details').innerHTML = `
                     <div class="error">
-                        <p>Erreur: Système d'exploitation "${os}" non trouvé</p>
+                        <p>Error: Operating system "${os}" not found</p>
                     </div>
                 `;
                 return;
             }
             
-            // Afficher les détails du template latest
+            // Display latest template details
             displayLatestTemplate(osData);
             
-            // Afficher l'historique des templates
+            // Display template history
             displayTemplateHistory(osData);
             
-            // Afficher les fichiers associés
+            // Display associated files
             displayTemplateFiles(osData);
         }
         
@@ -454,7 +456,7 @@
             const template = osData.latest;
             const detailsElement = document.getElementById('template-details');
             
-            // Extraire le timestamp de base du fichier XVA
+            // Extract base timestamp from XVA file
             const xvaFile = template.files[0];
             const baseFilename = xvaFile.split('/').pop().replace('.xva', '');
             
@@ -475,18 +477,18 @@
                     </div>
                     
                     <div class="template-metadata">
-                        <h3>Informations</h3>
+                        <h3>Information</h3>
                         <ul>
-                            <li><strong>Publié par:</strong> ${template.publisher}</li>
-                            <li><strong>Date de publication:</strong> ${template.release_date}</li>
-                            <li><strong>Plateforme cible:</strong> ${template.target_platform !== 'NA' ? template.target_platform : 'Non spécifiée'}</li>
+                            <li><strong>Published by:</strong> ${template.publisher}</li>
+                            <li><strong>Release date:</strong> ${template.release_date}</li>
+                            <li><strong>Target platform:</strong> ${template.target_platform !== 'NA' ? template.target_platform : 'Not specified'}</li>
                             <li><strong>Tags:</strong> ${template.tags.join(', ')}</li>
                         </ul>
                     </div>
                     
                     <div class="template-download">
-                        <h3>Téléchargement</h3>
-                        <a href="${template.files[0]}" class="download-button">Télécharger le template</a>
+                        <h3>Download</h3>
+                        <a href="${template.files[0]}" class="download-button">Download template</a>
                     </div>
                 </div>
             `;
@@ -496,13 +498,13 @@
             const historyElement = document.getElementById('template-history');
             
             if (!osData.history || osData.history.length <= 1) {
-                historyElement.innerHTML = '<p>Aucun historique disponible pour ce template.</p>';
+                historyElement.innerHTML = '<p>No history available for this template.</p>';
                 return;
             }
             
             let html = '<div class="history-list">';
             
-            // Commencer à partir de l'index 1 pour sauter la version latest qui est déjà affichée
+            // Start from index 1 to skip the latest version which is already displayed
             for (let i = 1; i < osData.history.length; i++) {
                 const template = osData.history[i];
                 const xvaFile = template.files[0];
@@ -512,11 +514,11 @@
                     <div class="history-item">
                         <div class="history-info">
                             <h3>${template.name}</h3>
-                            <div class="history-date">Publié le: ${template.release_date}</div>
+                            <div class="history-date">Published on: ${template.release_date}</div>
                             <div class="history-description">${template.description}</div>
                         </div>
                         <div class="history-actions">
-                            <a href="${template.files[0]}" class="download-button">Télécharger</a>
+                            <a href="${template.files[0]}" class="download-button">Download</a>
                         </div>
                     </div>
                 `;
@@ -532,7 +534,7 @@
             const xvaFile = template.files[0];
             const baseFilename = xvaFile.split('/').pop().replace('.xva', '');
             
-            // Construire les chemins des fichiers associés
+            // Build paths for associated files
             const metadataFile = xvaFile.replace('.xva', '-metadata.json');
             const logFile = xvaFile.replace('.xva', '-build.log');
             
@@ -542,10 +544,11 @@
                     <div class="file-icon">📦</div>
                     <div class="file-info">
                         <div class="file-name">${baseFilename}.xva</div>
-                        <div class="file-description">Fichier template XVA</div>
+                        <div class="file-description">XVA template file</div>
                     </div>
-                    <div class="file-actions">
-                        <a href="${xvaFile}" class="download-button">Télécharger</a>
+                    <div class="file-actions" style="display: flex; gap: 0.5rem;">
+                        <a href="${xvaFile}" class="download-button">Download</a>
+                        <a href="${xvaFile}" target="_blank" class="download-button" style="background-color: var(--secondary-color);">View</a>
                     </div>
                 </div>
                 
@@ -553,10 +556,11 @@
                     <div class="file-icon">📄</div>
                     <div class="file-info">
                         <div class="file-name">${baseFilename}-metadata.json</div>
-                        <div class="file-description">Fichier de métadonnées</div>
+                        <div class="file-description">Metadata file</div>
                     </div>
-                    <div class="file-actions">
-                        <a href="${metadataFile}" class="download-button">Télécharger</a>
+                    <div class="file-actions" style="display: flex; gap: 0.5rem;">
+                        <a href="${metadataFile}" class="download-button">Download</a>
+                        <a href="${metadataFile}" target="_blank" class="download-button" style="background-color: var(--secondary-color);">View</a>
                     </div>
                 </div>
                 
@@ -564,10 +568,11 @@
                     <div class="file-icon">📋</div>
                     <div class="file-info">
                         <div class="file-name">${baseFilename}-build.log</div>
-                        <div class="file-description">Journal de build</div>
+                        <div class="file-description">Build log</div>
                     </div>
-                    <div class="file-actions">
-                        <a href="${logFile}" class="download-button">Télécharger</a>
+                    <div class="file-actions" style="display: flex; gap: 0.5rem;">
+                        <a href="${logFile}" class="download-button">Download</a>
+                        <a href="${logFile}" target="_blank" class="download-button" style="background-color: var(--secondary-color);">View</a>
                     </div>
                 </div>
             `;

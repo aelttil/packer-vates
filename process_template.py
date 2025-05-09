@@ -234,64 +234,130 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
     """Génère le fichier JSON de métadonnées à partir des données HCL"""
     print("Génération du fichier de métadonnées...")
     
+    # Débogage: Afficher la structure de hcl_data
+    print("Structure de hcl_data:")
+    import pprint
+    pprint.pprint(hcl_data, depth=2)
+    
     # Déterminer dynamiquement le système d'exploitation et la version
     os_type, os_version = determine_os_info(template_file, hcl_data)
     
-    # Valeurs par défaut
+    # Valeurs par défaut améliorées
     vm_name = f"{os_type}-{os_version}"
     vm_description = f"{os_type.capitalize()} {os_version} Template"
     vm_tags = [os_type, f"{os_type}{os_version}", "cloud-init"]
-    template_logo_url = "NA"  # Valeur par défaut
-    publisher_logo_url = "NA"  # Valeur par défaut
+    template_logo_url = "images/default-os.png"  # Valeur par défaut améliorée
+    publisher_logo_url = "images/cloudtemple.svg"  # Valeur par défaut améliorée
     publisher = "Cloud Temple"  # Valeur par défaut
-    target_platform = "NA"  # Valeur par défaut
+    target_platform = "openiaas"  # Valeur par défaut améliorée
     
-    # Extraction des informations pertinentes du fichier HCL
+    # Extraction améliorée des informations du fichier HCL
     try:
-        if isinstance(hcl_data, dict):
-            # Extraire les valeurs des variables
-            if "variable" in hcl_data:
-                variables = hcl_data["variable"]
-                if "template_logo_url" in variables and "default" in variables["template_logo_url"]:
-                    template_logo_url = variables["template_logo_url"]["default"]
-                if "publisher_logo_url" in variables and "default" in variables["publisher_logo_url"]:
-                    publisher_logo_url = variables["publisher_logo_url"]["default"]
-                if "publisher" in variables and "default" in variables["publisher"]:
-                    publisher = variables["publisher"]["default"]
-                if "target_platform" in variables and "default" in variables["target_platform"]:
-                    target_platform = variables["target_platform"]["default"]
+        # Extraction des variables
+        if isinstance(hcl_data, dict) and "variable" in hcl_data:
+            variables = hcl_data["variable"]
             
-            # Extraire les informations de la VM
-            source_data = hcl_data.get("source", {}).get("xenserver-iso", {})
-            first_source_key = next(iter(source_data.keys()), None)
-            if first_source_key:
-                source_config = source_data[first_source_key]
-                vm_name = source_config.get("vm_name", vm_name)
-                vm_description = source_config.get("vm_description", vm_description)
-                if "vm_tags" in source_config:
-                    vm_tags = source_config.get("vm_tags")
+            # Débogage: Afficher les variables
+            print("Variables trouvées:")
+            pprint.pprint(variables, depth=2)
+            
+            # Extraction plus robuste des valeurs
+            if "template_logo_url" in variables:
+                template_logo_url_var = variables["template_logo_url"]
+                if isinstance(template_logo_url_var, dict) and "default" in template_logo_url_var:
+                    template_logo_url = template_logo_url_var["default"]
+                    print(f"template_logo_url extrait: {template_logo_url}")
+            
+            if "publisher_logo_url" in variables:
+                publisher_logo_url_var = variables["publisher_logo_url"]
+                if isinstance(publisher_logo_url_var, dict) and "default" in publisher_logo_url_var:
+                    publisher_logo_url = publisher_logo_url_var["default"]
+                    print(f"publisher_logo_url extrait: {publisher_logo_url}")
+            
+            if "publisher" in variables:
+                publisher_var = variables["publisher"]
+                if isinstance(publisher_var, dict) and "default" in publisher_var:
+                    publisher = publisher_var["default"]
+                    print(f"publisher extrait: {publisher}")
+            
+            if "target_platform" in variables:
+                target_platform_var = variables["target_platform"]
+                if isinstance(target_platform_var, dict) and "default" in target_platform_var:
+                    target_platform = target_platform_var["default"]
+                    print(f"target_platform extrait: {target_platform}")
+        
+        # Extraction des informations de la VM
+        if isinstance(hcl_data, dict) and "source" in hcl_data:
+            sources = hcl_data["source"]
+            if "xenserver-iso" in sources:
+                xenserver_sources = sources["xenserver-iso"]
+                
+                # Débogage: Afficher les sources
+                print("Sources trouvées:")
+                pprint.pprint(xenserver_sources, depth=2)
+                
+                # Parcourir toutes les sources
+                for source_name, source_config in xenserver_sources.items():
+                    if "vm_name" in source_config:
+                        vm_name = source_config["vm_name"]
+                        print(f"vm_name extrait: {vm_name}")
+                    
+                    if "vm_description" in source_config:
+                        vm_description = source_config["vm_description"]
+                        print(f"vm_description extrait: {vm_description}")
+                    
+                    if "vm_tags" in source_config:
+                        vm_tags = source_config["vm_tags"]
+                        print(f"vm_tags extraits: {vm_tags}")
+        
+        # Gestion alternative pour les structures de données différentes
         elif isinstance(hcl_data, list):
-            # Parcourir la liste pour trouver les informations de source
+            print("hcl_data est une liste, parcours des éléments...")
             for item in hcl_data:
-                if isinstance(item, dict) and "source" in item:
-                    source_data = item.get("source", {})
-                    if "xenserver-iso" in source_data:
-                        xenserver_data = source_data.get("xenserver-iso", {})
-                        for key, value in xenserver_data.items():
-                            if "vm_name" in value:
-                                vm_name = value.get("vm_name")
-                            if "vm_description" in value:
-                                vm_description = value.get("vm_description")
-                            if "vm_tags" in value:
-                                vm_tags = value.get("vm_tags")
-                            # Ne plus chercher ces valeurs dans la section source
+                if isinstance(item, dict):
+                    # Recherche des variables
+                    if "variable" in item:
+                        var_item = item["variable"]
+                        print(f"Variable trouvée dans la liste: {var_item.keys() if isinstance(var_item, dict) else 'non dict'}")
+                        
+                        if isinstance(var_item, dict):
+                            if "template_logo_url" in var_item and "default" in var_item["template_logo_url"]:
+                                template_logo_url = var_item["template_logo_url"]["default"]
+                                print(f"template_logo_url extrait de la liste: {template_logo_url}")
+                            
+                            if "publisher_logo_url" in var_item and "default" in var_item["publisher_logo_url"]:
+                                publisher_logo_url = var_item["publisher_logo_url"]["default"]
+                                print(f"publisher_logo_url extrait de la liste: {publisher_logo_url}")
+                    
+                    # Recherche des sources
+                    if "source" in item:
+                        source_item = item["source"]
+                        if "xenserver-iso" in source_item:
+                            xenserver_item = source_item["xenserver-iso"]
+                            print(f"Source xenserver-iso trouvée dans la liste: {xenserver_item.keys() if isinstance(xenserver_item, dict) else 'non dict'}")
+                            
+                            if isinstance(xenserver_item, dict):
+                                for key, value in xenserver_item.items():
+                                    if isinstance(value, dict):
+                                        if "vm_name" in value:
+                                            vm_name = value["vm_name"]
+                                            print(f"vm_name extrait de la liste: {vm_name}")
+                                        
+                                        if "vm_description" in value:
+                                            vm_description = value["vm_description"]
+                                            print(f"vm_description extrait de la liste: {vm_description}")
+                                        
+                                        if "vm_tags" in value:
+                                            vm_tags = value["vm_tags"]
+                                            print(f"vm_tags extraits de la liste: {vm_tags}")
     except Exception as e:
-        print(f"Avertissement: Impossible d'extraire les informations de la VM à partir du fichier HCL: {e}")
-        print(f"Utilisation des valeurs par défaut")
+        print(f"Avertissement: Erreur lors de l'extraction des informations: {e}")
+        import traceback
+        traceback.print_exc()
     
     # Construction du JSON de métadonnées
     metadata = {
-        "name": f"{vm_name}",  # Suppression du mot "Cloud"
+        "name": f"{vm_name}",
         "os": os_type,
         "version": f"{os_version}.0",
         "target_platform": target_platform,
@@ -303,6 +369,10 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
         "tags": vm_tags,
         "release_date": datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
     }
+    
+    # Débogage: Afficher les métadonnées générées
+    print("Métadonnées générées:")
+    pprint.pprint(metadata)
     
     metadata_file = f"metadata-{os_type}{os_version}-{datetime.datetime.now().strftime('%Y%m%d-%H%M%S')}.json"
     

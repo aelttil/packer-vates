@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloud Temple - - Marketplace</title>
+    <title>Cloud Temple - Marketplace</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -305,44 +305,52 @@
 </head>
 <body>
     <header>
-        <h1 class="marketplace-title">Cloud Temple Marketplace</h1>
+        <a href="index.html" style="text-decoration: none;">
+            <h1 class="marketplace-title">Cloud Temple Marketplace</h1>
+        </a>
         <div class="search-container">
-            <input type="text" class="search-input" placeholder="Rechercher dans le Marketplace">
+            <input type="text" class="search-input" placeholder="Search in Marketplace">
         </div>
         <img src="images/cloudtemple.svg" alt="Cloud Temple Logo" class="logo">
     </header>
     
     <div class="container">
         <aside class="sidebar">
-            <h2 class="sidebar-title">Catégories</h2>
+            <h2 class="sidebar-title">Categories</h2>
             <ul class="sidebar-menu">
-                <li class="sidebar-menu-item active">Tous les produits</li>
-                <li class="sidebar-menu-item">Systèmes d'exploitation</li>
-                <li class="sidebar-menu-item">Applications</li>
-                <li class="sidebar-menu-item">Bases de données</li>
-                <li class="sidebar-menu-item">Sécurité</li>
-                <li class="sidebar-menu-item">Développement</li>
-                <li class="sidebar-menu-item">Stockage</li>
-                <li class="sidebar-menu-item">Réseau</li>
+                <li class="sidebar-menu-item active" data-category="all">All products</li>
+                <li class="sidebar-menu-item" data-category="système d'exploitation">Operating Systems</li>
+                <li class="sidebar-menu-item" data-category="application">Applications</li>
+                <li class="sidebar-menu-item" data-category="base de données">Databases</li>
+                <li class="sidebar-menu-item" data-category="sécurité">Security</li>
+                <li class="sidebar-menu-item" data-category="développement">Development</li>
+                <li class="sidebar-menu-item" data-category="stockage">Storage</li>
+                <li class="sidebar-menu-item" data-category="réseau">Network</li>
             </ul>
+            
+            <div class="sidebar-actions" style="margin-top: 2rem;">
+                <a href="global_summary.json" class="download-json-button" style="display: block; text-align: center; padding: 0.75rem; background-color: var(--gray-200); border-radius: var(--border-radius-sm); text-decoration: none; color: var(--gray-700); font-size: 0.875rem; font-weight: 500;">
+                    Download metadata (JSON)
+                </a>
+            </div>
         </aside>
         
         <main class="main-content">
-            <h2 class="page-title">Tous les produits</h2>
+            <h2 class="page-title">All products</h2>
             
             <div id="content">
-                <div class="loading">Chargement des produits...</div>
+                <div class="loading">Loading products...</div>
             </div>
         </main>
     </div>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Charger le fichier JSON
+            // Load JSON file
             fetch('global_summary.json')
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Erreur lors du chargement des données: ' + response.status);
+                        throw new Error('Error loading data: ' + response.status);
                     }
                     return response.json();
                 })
@@ -352,19 +360,40 @@
                 .catch(error => {
                     document.getElementById('content').innerHTML = `
                         <div class="error">
-                            <p>Erreur: ${error.message}</p>
+                            <p>Error: ${error.message}</p>
                         </div>
                     `;
                 });
         });
         
+        // Function to filter products by category
+        function filterProducts(category) {
+            // If category is "all", display all products
+            if (category === 'all') {
+                document.querySelectorAll('.product-card').forEach(card => {
+                    card.style.display = 'flex';
+                });
+                return;
+            }
+            
+            // Otherwise, filter products by category
+            document.querySelectorAll('.product-card').forEach(card => {
+                const productCategory = card.querySelector('.product-category').textContent.toLowerCase();
+                if (productCategory === category.toLowerCase()) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
         function displayProducts(data) {
             const contentElement = document.getElementById('content');
             let html = '<div class="product-grid">';
             
-            // Parcourir la liste des systèmes d'exploitation
+            // Loop through the list of operating systems
             data.operating_systems.forEach(osData => {
-                // Récupérer uniquement la dernière version (latest)
+                // Get only the latest version
                 const template = osData.latest;
                 
                 html += `
@@ -372,23 +401,43 @@
                         <a href="detail.html?os=${osData.os}" class="product-link">
                             <img src="${osData.os === 'debian' ? 'images/debian.png' : osData.os === 'ubuntu' ? 'images/ubuntu.png' : 'images/default-os.png'}" 
                                  alt="${osData.os} Logo" class="product-logo">
-                            <div class="product-category">Système d'exploitation</div>
+                            <div class="product-category">Operating System</div>
                             <h3 class="product-name">${template.name}</h3>
                             <div class="product-description">${template.description}</div>
                         </a>
                         <div class="product-owner">
-                            <span class="product-owner-label">Publié par:</span>
+                            <span class="product-owner-label">Published by:</span>
                             <span class="product-owner-name">${template.publisher}</span>
                         </div>
                         <div class="product-actions">
-                            <a href="${template.files[0]}" class="product-action-button download-button">Télécharger</a>
-                            <a href="detail.html?os=${osData.os}" class="product-action-button info-button">Détails</a>
+                            <a href="${template.files[0]}" class="product-action-button download-button">Download</a>
+                            <a href="detail.html?os=${osData.os}" class="product-action-button info-button">Details</a>
                         </div>
                     </div>
                 `;
             });
             html += '</div>';
             contentElement.innerHTML = html;
+            
+            // Add event listeners for menu items
+            document.querySelectorAll('.sidebar-menu-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    // Remove active class from all items
+                    document.querySelectorAll('.sidebar-menu-item').forEach(i => i.classList.remove('active'));
+                    
+                    // Add active class to clicked item
+                    this.classList.add('active');
+                    
+                    // Get category
+                    const category = this.getAttribute('data-category');
+                    
+                    // Update page title
+                    document.querySelector('.page-title').textContent = this.textContent;
+                    
+                    // Filter products
+                    filterProducts(category);
+                });
+            });
         }
     </script>
 </body>
