@@ -1,0 +1,66 @@
+name: Build Ubuntu 22.04 Template
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'packer/ubuntu/**'
+      - 'packer/common/**'
+      - '.github/workflows/build-ubuntu22.yml'
+  pull_request:
+    branches: [ main ]
+  # Permettre le déclenchement manuel
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        run: |
+          # Checkout code manually if the action fails
+          if [ -d ".git" ]; then
+            git pull
+          else
+            git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" .
+            git checkout "${GITHUB_REF#refs/heads/}"
+          fi
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Create credentials file
+        run: |
+          cat > credentials.pkrvars.hcl << EOF
+          remote_host = "${{ secrets.REMOTE_HOST }}"
+          remote_username = "root"
+          remote_password = "${{ secrets.REMOTE_PASSWORD }}"
+          sr_iso_name = "ISO"
+          sr_name = "${{ secrets.SR_NAME }}"
+          network_names = ["${{ secrets.NETWORK_NAME }}"]
+          EOF
+
+      - name: Initialize Packer
+        run: |
+          cd packer/ubuntu
+          packer init ubuntu22.pkr.hcl
+          cd ../..
+
+      - name: Process template
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+        run: |
+          python3 process_template.py packer/ubuntu/ubuntu22.pkr.hcl credentials.pkrvars.hcl
+
+      # Les artefacts sont directement téléchargés vers S3 et les fichiers locaux sont nettoyés
+      - name: Cleanup
+        run: |
+          echo "Les artefacts ont été téléchargés vers S3 et les fichiers locaux ont été nettoyés"
+          echo "Structure S3: {environnement}/{os_type}{os_version}-{timestamp}.xva"
+          echo "              {environnement}/{os_type}{os_version}-{timestamp}-metadata.json"
+          echo "              {environnement}/{os_type}{os_version}-{timestamp}-build.log"
