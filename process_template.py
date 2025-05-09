@@ -230,6 +230,41 @@ def find_output_file(log_content, output_dir):
     print("Erreur: Impossible de trouver le fichier XVA généré")
     sys.exit(1)
 
+def extract_vm_description_from_source(hcl_data):
+    """Extrait la description de la VM depuis la section source, quelle que soit sa structure"""
+    vm_description = None
+    
+    # Fonction récursive pour parcourir la structure de données
+    def search_vm_description(data):
+        nonlocal vm_description
+        
+        if vm_description:  # Si déjà trouvé, ne pas continuer
+            return
+            
+        if isinstance(data, dict):
+            # Chercher directement vm_description dans ce dictionnaire
+            if "vm_description" in data:
+                vm_description = data["vm_description"]
+                return
+                
+            # Sinon, parcourir récursivement toutes les valeurs
+            for key, value in data.items():
+                search_vm_description(value)
+                
+        elif isinstance(data, list):
+            # Parcourir récursivement tous les éléments de la liste
+            for item in data:
+                search_vm_description(item)
+    
+    # Commencer par chercher dans la section "source" si elle existe
+    if isinstance(hcl_data, dict) and "source" in hcl_data:
+        search_vm_description(hcl_data["source"])
+    else:
+        # Sinon, chercher dans toute la structure
+        search_vm_description(hcl_data)
+        
+    return vm_description
+
 def generate_metadata(template_file, hcl_data, xva_file, s3_url):
     """Génère le fichier JSON de métadonnées à partir des données HCL"""
     print("Génération du fichier de métadonnées...")
@@ -250,6 +285,14 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
     publisher_logo_url = "images/cloudtemple.svg"  # Valeur par défaut améliorée
     publisher = "Cloud Temple"  # Valeur par défaut
     target_platform = "openiaas"  # Valeur par défaut améliorée
+    
+    # Extraction de vm_description directement depuis la section source
+    extracted_description = extract_vm_description_from_source(hcl_data)
+    if extracted_description:
+        vm_description = extracted_description
+        # Remplacer les caractères d'échappement par des espaces
+        vm_description = vm_description.replace("\\n", " ")
+        print(f"vm_description extrait: {vm_description}")
     
     # Extraction améliorée des informations du fichier HCL
     try:
