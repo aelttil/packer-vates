@@ -14,3 +14,10 @@ pkg upgrade -y
 opnsense-update
 
 echo "Mise à jour du système OPNsense terminée."
+
+
+echo "Installation du plugin net/frr -- The FRRouting Protocol Suite"
+
+pkg install os-frr
+
+echo "Installation des plugin terminé."

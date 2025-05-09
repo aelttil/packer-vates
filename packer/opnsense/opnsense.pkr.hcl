@@ -83,21 +83,24 @@ source "xenserver-iso" "opnsense" {
 
   # Ces commandes de démarrage sont spécifiques à OPNsense et devront être ajustées
   boot_command = [
-    "<wait10><wait10>",
-    "installer<enter><wait5>",
-    "<enter><wait>",  # Accept copyright
-    "<enter><wait>",  # Select keyboard layout
-    "<enter><wait>",  # Select storage
-    "<enter><wait>",  # Select partition scheme
-    "<enter><wait>",  # Confirm partition
-    "<enter><wait10><wait10>",  # Wait for base installation
-    "admct<enter><wait>",  # Set root password
-    "InitCT@2025<enter><wait>",  # Enter password
-    "InitCT@2025<enter><wait>",  # Confirm password
-    "<enter><wait10><wait10>",  # Complete installation
-    "reboot<enter><wait10><wait10><wait10>",  # Reboot
-    "admct<enter><wait>",  # Login
-    "InitCT@2025<enter><wait>"  # Password
+
+        "<wait1m30s>",
+        "installer<enter>",
+        "opnsense<enter><wait>",
+        "<enter><wait2s>",
+        "<down><enter><wait2s>",
+        "<down><enter><wait2s>",
+        "<left><enter><wait2s>",
+        "<wait5m>",
+        "<down><enter><wait>",
+        "<wait1m30s>",
+        "root<enter>",
+        "opnsense<enter><wait>",
+        "8<enter><wait2s>",
+        "dhclient vtnet0<enter><wait5s>",
+        "telnet {{ .HTTPIP }} {{ .HTTPPort }} | sed '1,/^$/d' >/conf/config.xml<wait><enter>",
+        "GET /config.xml HTTP/1.0<enter><enter>",
+        "reboot<enter>"
   ]
 
   clone_template = "Generic Linux BIOS"
@@ -121,7 +124,7 @@ source "xenserver-iso" "opnsense" {
   pause_before_connecting = "60s"
 
   # Conserver la VM en cas d'échec pour faciliter le débogage
-  keep_vm          = "never"
+  keep_vm          = "always" #TODO never
   format = "xva_compressed"
 }
 
