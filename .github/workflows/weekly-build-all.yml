@@ -1,0 +1,174 @@
+name: Weekly Build All Templates
+
+on:
+  # Exécution hebdomadaire (tous les lundis à 2h du matin)
+  schedule:
+    - cron: '0 2 * * 1'
+  # Permettre le déclenchement manuel
+  workflow_dispatch:
+
+jobs:
+  # Job pour builder Debian 12
+  build-debian12:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        run: |
+          # Checkout code manually if the action fails
+          if [ -d ".git" ]; then
+            git pull
+          else
+            git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" .
+            git checkout "${GITHUB_REF#refs/heads/}"
+          fi
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Create credentials file
+        run: |
+          cat > credentials.pkrvars.hcl << EOF
+          remote_host = "${{ secrets.REMOTE_HOST }}"
+          remote_username = "root"
+          remote_password = "${{ secrets.REMOTE_PASSWORD }}"
+          sr_iso_name = "ISO"
+          sr_name = "${{ secrets.SR_NAME }}"
+          network_names = ["${{ secrets.NETWORK_NAME }}"]
+          EOF
+
+      - name: Initialize Packer
+        run: |
+          cd packer/debian
+          packer init debian12.pkr.hcl
+          cd ../..
+
+      - name: Process template
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+        run: |
+          python3 process_template.py packer/debian/debian12.pkr.hcl credentials.pkrvars.hcl
+
+  # Job pour builder Ubuntu 22.04
+  build-ubuntu22:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        run: |
+          # Checkout code manually if the action fails
+          if [ -d ".git" ]; then
+            git pull
+          else
+            git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" .
+            git checkout "${GITHUB_REF#refs/heads/}"
+          fi
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Create credentials file
+        run: |
+          cat > credentials.pkrvars.hcl << EOF
+          remote_host = "${{ secrets.REMOTE_HOST }}"
+          remote_username = "root"
+          remote_password = "${{ secrets.REMOTE_PASSWORD }}"
+          sr_iso_name = "ISO"
+          sr_name = "${{ secrets.SR_NAME }}"
+          network_names = ["${{ secrets.NETWORK_NAME }}"]
+          EOF
+
+      - name: Initialize Packer
+        run: |
+          cd packer/ubuntu
+          packer init ubuntu22.pkr.hcl
+          cd ../..
+
+      - name: Process template
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+        run: |
+          python3 process_template.py packer/ubuntu/ubuntu22.pkr.hcl credentials.pkrvars.hcl
+
+  # Job pour builder Ubuntu 24.04
+  build-ubuntu24:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        run: |
+          # Checkout code manually if the action fails
+          if [ -d ".git" ]; then
+            git pull
+          else
+            git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" .
+            git checkout "${GITHUB_REF#refs/heads/}"
+          fi
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Create credentials file
+        run: |
+          cat > credentials.pkrvars.hcl << EOF
+          remote_host = "${{ secrets.REMOTE_HOST }}"
+          remote_username = "root"
+          remote_password = "${{ secrets.REMOTE_PASSWORD }}"
+          sr_iso_name = "ISO"
+          sr_name = "${{ secrets.SR_NAME }}"
+          network_names = ["${{ secrets.NETWORK_NAME }}"]
+          EOF
+
+      - name: Initialize Packer
+        run: |
+          cd packer/ubuntu
+          packer init ubuntu24.pkr.hcl
+          cd ../..
+
+      - name: Process template
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+        run: |
+          python3 process_template.py packer/ubuntu/ubuntu24.pkr.hcl credentials.pkrvars.hcl
+
+  # Job pour générer les métadonnées globales
+  generate-metadata:
+    needs: [build-debian12, build-ubuntu22, build-ubuntu24]
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        run: |
+          # Checkout code manually if the action fails
+          if [ -d ".git" ]; then
+            git pull
+          else
+            git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" .
+            git checkout "${GITHUB_REF#refs/heads/}"
+          fi
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Generate global metadata
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+        run: |
+          python3 generate_global_metadata.py
+          echo "✅ Métadonnées globales mises à jour avec succès"
