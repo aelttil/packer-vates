@@ -67,10 +67,10 @@ def extract_os_info_from_filename(template_file):
     """Extrait les informations OS du nom du fichier template"""
     filename = os.path.basename(template_file)
     
-    # Patterns pour différentes distributions
-    debian_pattern = re.compile(r'debian(\d+)')
-    ubuntu_pattern = re.compile(r'ubuntu(\d+)')
-    centos_pattern = re.compile(r'centos(\d+)')
+    # Patterns pour différentes distributions avec version complète
+    debian_pattern = re.compile(r'debian(\d+(?:\.\d+)?)')
+    ubuntu_pattern = re.compile(r'ubuntu(\d+(?:\.\d+)?)')
+    centos_pattern = re.compile(r'centos(\d+(?:\.\d+)?)')
     
     # Vérifier Debian
     match = debian_pattern.search(filename)
@@ -176,24 +176,56 @@ def determine_os_info(template_file, hcl_data):
     # Par défaut
     return "linux", "unknown"
 
+def extract_output_dir_from_logs(log_content):
+    """Extrait le répertoire de sortie directement des logs Packer"""
+    # Rechercher des lignes comme "VM files in directory: packer-template-ubuntu-24.04"
+    output_dir_pattern = re.compile(r'VM files in directory: ([^\s]+)')
+    match = output_dir_pattern.search(log_content)
+    if match:
+        return match.group(1)
+    return None
+
 def find_output_file(log_content, output_dir):
     """Trouve le chemin du fichier XVA généré par Packer"""
     print(f"Recherche du fichier de sortie dans {output_dir}...")
     
-    # Recherche dans les logs pour trouver des informations sur le fichier de sortie
-    # Cette partie peut nécessiter des ajustements selon le format exact des logs de Packer
-    
     # Méthode 1: Recherche directe dans le répertoire de sortie
-    for root, dirs, files in os.walk(output_dir):
+    if os.path.exists(output_dir):
+        for root, dirs, files in os.walk(output_dir):
+            for file in files:
+                if file.endswith(".xva"):
+                    return os.path.join(root, file)
+    
+    # Méthode 2: Extraction du répertoire de sortie à partir des logs
+    output_dir_from_logs = extract_output_dir_from_logs(log_content)
+    if output_dir_from_logs and os.path.exists(output_dir_from_logs):
+        print(f"Répertoire de sortie trouvé dans les logs: {output_dir_from_logs}")
+        for root, dirs, files in os.walk(output_dir_from_logs):
+            for file in files:
+                if file.endswith(".xva"):
+                    return os.path.join(root, file)
+    
+    # Méthode 3: Recherche récursive dans le répertoire courant pour les fichiers XVA récents
+    print("Recherche récursive des fichiers XVA récents...")
+    # Chercher les fichiers XVA créés dans les dernières 30 minutes
+    import time
+    current_time = time.time()
+    for root, dirs, files in os.walk('.'):
         for file in files:
             if file.endswith(".xva"):
-                return os.path.join(root, file)
+                file_path = os.path.join(root, file)
+                file_creation_time = os.path.getctime(file_path)
+                if current_time - file_creation_time < 1800:  # 30 minutes en secondes
+                    print(f"Fichier XVA récent trouvé: {file_path}")
+                    return file_path
     
-    # Méthode 2: Extraction à partir des logs
+    # Méthode 4: Extraction à partir des logs
     xva_pattern = re.compile(r'Output: (.*\.xva)')
     match = xva_pattern.search(log_content)
     if match:
-        return match.group(1)
+        xva_path = match.group(1)
+        if os.path.exists(xva_path):
+            return xva_path
     
     print("Erreur: Impossible de trouver le fichier XVA généré")
     sys.exit(1)
