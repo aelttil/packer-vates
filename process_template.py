@@ -291,7 +291,7 @@ def generate_metadata(template_file, hcl_data, xva_file, s3_url):
     
     # Construction du JSON de métadonnées
     metadata = {
-        "name": f"{vm_name} Cloud",
+        "name": f"{vm_name}",  # Suppression du mot "Cloud"
         "os": os_type,
         "version": f"{os_version}.0",
         "target_platform": target_platform,

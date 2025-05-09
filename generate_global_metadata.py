@@ -50,6 +50,13 @@ def extract_metadata_from_json(json_str, key_name):
     if not os_name or not version:
         raise ValueError("Champ 'os' ou 'version' manquant")
 
+    # Extraire la version majeure (ex: "12.0" -> "12")
+    import re
+    major_version = ""
+    match = re.search(r"^(\d+)", version)
+    if match:
+        major_version = match.group(1)
+    
     # Extraire timestamp depuis le nom du fichier
     base = os.path.basename(key_name)
     try:
@@ -59,7 +66,10 @@ def extract_metadata_from_json(json_str, key_name):
     except Exception as e:
         raise ValueError(f"Impossible d'extraire le timestamp depuis {key_name}: {e}")
 
-    return os_name, timestamp, data
+    # Créer un identifiant combiné OS+version (ex: "ubuntu22", "debian12")
+    os_key = f"{os_name}{major_version}"
+
+    return os_key, timestamp, data
 
 def generate_full_structure(json_keys):
     grouped = defaultdict(list)
@@ -68,18 +78,27 @@ def generate_full_structure(json_keys):
         try:
             response = s3.get_object(Bucket=bucket, Key=key)
             body = response['Body'].read().decode('utf-8')
-            os_name, ts, data = extract_metadata_from_json(body, key)
-            grouped[os_name].append((ts, data))
+            os_key, ts, data = extract_metadata_from_json(body, key)
+            grouped[os_key].append((ts, data))
         except Exception as e:
             print(f"⚠️ Erreur sur {key} : {e}")
 
     # Nouvelle structure avec operating_systems comme liste
     result = {"operating_systems": []}
     
-    for os_name, builds in grouped.items():
+    for os_key, builds in grouped.items():
         sorted_builds = sorted(builds, key=lambda x: x[0], reverse=True)
+        
+        # Extraire le nom de l'OS de base (ex: "ubuntu22" -> "ubuntu")
+        import re
+        base_os = re.sub(r'\d+$', '', os_key)
+        
+        # Extraire la version (ex: "ubuntu22" -> "22")
+        version = os_key.replace(base_os, "")
+        
         os_data = {
-            "os": os_name,
+            "os": base_os,
+            "version": version,
             "latest": sorted_builds[0][1],
             "history": [build[1] for build in sorted_builds]
         }
