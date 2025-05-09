@@ -339,7 +339,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Charger le fichier JSON
-            fetch('template-os-metadata.json')
+            fetch('global_summary.json')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Erreur lors du chargement des données: ' + response.status);
@@ -362,35 +362,30 @@
             const contentElement = document.getElementById('content');
             let html = '<div class="product-grid">';
             
-            // Parcourir tous les OS
-            Object.keys(data).forEach(os => {
-                const osData = data[os];
+            // Parcourir la liste des systèmes d'exploitation
+            data.operating_systems.forEach(osData => {
+                // Récupérer uniquement la dernière version (latest)
+                const template = osData.latest;
                 
-                // Parcourir toutes les versions de l'OS
-                Object.keys(osData).forEach(version => {
-                    const templates = osData[version];
-                    
-                    // Parcourir tous les templates de cette version
-                    templates.forEach(template => {
-                        html += `
-                            <div class="product-card">
-                                <img src="${os === 'debian' ? 'images/debian.png' : os === 'ubuntu' ? 'images/ubuntu.png' : 'images/default-os.png'}" 
-                                     alt="${os} Logo" class="product-logo">
-                                <div class="product-category">Système d'exploitation</div>
-                                <h3 class="product-name">${template.name}</h3>
-                                <div class="product-description">${template.description}</div>
-                                <div class="product-owner">
-                                    <span class="product-owner-label">Publié par:</span>
-                                    <span class="product-owner-name">${template.publisher}</span>
-                                </div>
-                                <div class="product-actions">
-                                    <a href="${template.files[0]}" class="product-action-button download-button">Télécharger</a>
-                                    <a href="${template.files[0].replace('.xva', '-metadata.json')}" class="product-action-button info-button">Métadonnées</a>
-                                </div>
-                            </div>
-                        `;
-                    });
-                });
+                html += `
+                    <div class="product-card">
+                        <a href="detail.html?os=${osData.os}" class="product-link">
+                            <img src="${osData.os === 'debian' ? 'images/debian.png' : osData.os === 'ubuntu' ? 'images/ubuntu.png' : 'images/default-os.png'}" 
+                                 alt="${osData.os} Logo" class="product-logo">
+                            <div class="product-category">Système d'exploitation</div>
+                            <h3 class="product-name">${template.name}</h3>
+                            <div class="product-description">${template.description}</div>
+                        </a>
+                        <div class="product-owner">
+                            <span class="product-owner-label">Publié par:</span>
+                            <span class="product-owner-name">${template.publisher}</span>
+                        </div>
+                        <div class="product-actions">
+                            <a href="${template.files[0]}" class="product-action-button download-button">Télécharger</a>
+                            <a href="detail.html?os=${osData.os}" class="product-action-button info-button">Détails</a>
+                        </div>
+                    </div>
+                `;
             });
             
             html += '</div>';

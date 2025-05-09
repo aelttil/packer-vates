@@ -90,15 +90,14 @@ def upload_html_to_s3():
         print(f"{datetime.datetime.now()} - Erreur lors de la création de la session S3: {e}")
         return
     
-    # Nom de l'objet S3
-    key = "index.html"
+    # Télécharger le fichier HTML principal (index.html)
+    index_key = "index.html"
     
-    # Télécharger le fichier HTML principal
     success = upload_file_to_s3(
         s3_client, 
         html_file_path, 
         bucket, 
-        key, 
+        index_key, 
         'text/html'
     )
     
@@ -107,8 +106,29 @@ def upload_html_to_s3():
         return
     
     # Générer l'URL publique
-    public_url = f"{endpoint_url}/{bucket}/{key}"
-    print(f"{datetime.datetime.now()} - Fichier HTML téléchargé avec succès: {public_url}")
+    public_url = f"{endpoint_url}/{bucket}/{index_key}"
+    print(f"{datetime.datetime.now()} - Fichier HTML principal téléchargé avec succès: {public_url}")
+    
+    # Télécharger le fichier HTML de détail (detail.html)
+    detail_file_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "html_templates", "detail.html")
+    
+    if os.path.exists(detail_file_path):
+        detail_key = "detail.html"
+        
+        success = upload_file_to_s3(
+            s3_client, 
+            detail_file_path, 
+            bucket, 
+            detail_key, 
+            'text/html'
+        )
+        
+        if success:
+            print(f"{datetime.datetime.now()} - Fichier HTML de détail téléchargé avec succès: {endpoint_url}/{bucket}/{detail_key}")
+        else:
+            print(f"{datetime.datetime.now()} - Erreur lors du téléchargement du fichier HTML de détail")
+    else:
+        print(f"{datetime.datetime.now()} - Fichier HTML de détail non trouvé: {detail_file_path}")
     
     # Télécharger les fichiers d'images par défaut
     images_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "html_templates", "images")
