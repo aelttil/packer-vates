@@ -1,26 +1,100 @@
 #!/usr/bin/env python3
 import os
 import sys
+import json
 import boto3
 from botocore.config import Config
 import urllib3
 import datetime
+from collections import defaultdict
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-def upload_file_to_s3(s3_client, local_file, bucket, key, content_type):
+def list_json_files(s3_client, bucket_name):
+    """Liste tous les fichiers JSON de métadonnées dans le bucket S3"""
+    paginator = s3_client.get_paginator('list_objects_v2')
+    operation_parameters = {'Bucket': bucket_name}
+    json_files = []
+
+    for page in paginator.paginate(**operation_parameters):
+        for obj in page.get('Contents', []):
+            key = obj['Key']
+            if key.endswith('-metadata.json'):
+                json_files.append(key)
+    return json_files
+
+def extract_metadata_from_json(json_str, key_name):
+    """Extrait les métadonnées d'un fichier JSON"""
+    data = json.loads(json_str)
+
+    os_name = data.get("os")
+    version = data.get("version")
+    if not os_name or not version:
+        raise ValueError("Champ 'os' ou 'version' manquant")
+
+    # Extraire timestamp depuis le nom du fichier
+    base = os.path.basename(key_name)
+    try:
+        parts = base.split("-")
+        ts_str = parts[1] + parts[2]  # '20250508' + '124037'
+        timestamp = datetime.datetime.strptime(ts_str, "%Y%m%d%H%M%S")
+    except Exception as e:
+        raise ValueError(f"Impossible d'extraire le timestamp depuis {key_name}: {e}")
+
+    return os_name, timestamp, data
+
+def generate_full_structure(s3_client, bucket, json_keys):
+    """Génère la structure complète du fichier global_summary.json"""
+    grouped = defaultdict(list)
+
+    for key in json_keys:
+        try:
+            response = s3_client.get_object(Bucket=bucket, Key=key)
+            body = response['Body'].read().decode('utf-8')
+            os_name, ts, data = extract_metadata_from_json(body, key)
+            grouped[os_name].append((ts, data))
+        except Exception as e:
+            print(f"{datetime.datetime.now()} - ⚠️ Erreur sur {key} : {e}")
+
+    # Nouvelle structure avec operating_systems comme liste
+    result = {"operating_systems": []}
+    
+    for os_name, builds in grouped.items():
+        sorted_builds = sorted(builds, key=lambda x: x[0], reverse=True)
+        os_data = {
+            "os": os_name,
+            "latest": sorted_builds[0][1],
+            "history": [build[1] for build in sorted_builds]
+        }
+        result["operating_systems"].append(os_data)
+
+    return result
+
+def save_global_summary(data, filename="global_summary.json"):
+    """Sauvegarde le fichier global_summary.json localement"""
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=2)
+    print(f"{datetime.datetime.now()} - ✅ Fichier '{filename}' généré avec succès.")
+    return filename
+
+def upload_file_to_s3(s3_client, local_file, bucket, key, content_type, inline=False):
     """Télécharge un fichier vers S3"""
     try:
-        with open(local_file, 'rb') as file_data:
-            print(f"{datetime.datetime.now()} - Téléchargement du fichier vers S3: {bucket}/{key}")
-            
-            s3_client.put_object(
-                Bucket=bucket,
-                Key=key,
-                Body=file_data,
-                ContentType=content_type,
-                ContentDisposition='inline',
-                ACL='public-read'
-            )
+        print(f"{datetime.datetime.now()} - Téléchargement du fichier vers S3: {bucket}/{key}")
+        
+        extra_args = {
+            'ContentType': content_type,
+            'ACL': 'public-read'
+        }
+        
+        if inline:
+            extra_args['ContentDisposition'] = 'inline'
+        
+        s3_client.upload_file(
+            local_file,
+            bucket,
+            key,
+            ExtraArgs=extra_args
+        )
         return True
     except Exception as e:
         print(f"{datetime.datetime.now()} - Erreur lors du téléchargement du fichier {local_file}: {e}")
@@ -90,7 +164,35 @@ def upload_html_to_s3():
         print(f"{datetime.datetime.now()} - Erreur lors de la création de la session S3: {e}")
         return
     
-    # Nom de l'objet S3
+    # Générer et télécharger le fichier global_summary.json
+    print(f"{datetime.datetime.now()} - Génération du fichier global_summary.json...")
+    
+    # Lister les fichiers JSON de métadonnées
+    json_files = list_json_files(s3_client, bucket)
+    print(f"{datetime.datetime.now()} - {len(json_files)} fichiers JSON de métadonnées trouvés")
+    
+    # Générer la structure complète
+    structured_data = generate_full_structure(s3_client, bucket, json_files)
+    
+    # Sauvegarder le fichier global_summary.json localement
+    global_summary_file = save_global_summary(structured_data)
+    
+    # Télécharger le fichier global_summary.json vers S3
+    success = upload_file_to_s3(
+        s3_client,
+        global_summary_file,
+        bucket,
+        "global_summary.json",
+        "application/json",
+        inline=True
+    )
+    
+    if success:
+        print(f"{datetime.datetime.now()} - Fichier global_summary.json téléchargé avec succès")
+    else:
+        print(f"{datetime.datetime.now()} - Erreur lors du téléchargement du fichier global_summary.json")
+    
+    # Nom de l'objet S3 pour le fichier HTML
     key = "index.html"
     
     # Télécharger le fichier HTML principal
@@ -99,7 +201,8 @@ def upload_html_to_s3():
         html_file_path, 
         bucket, 
         key, 
-        'text/html'
+        'text/html',
+        inline=True
     )
     
     if not success:
@@ -126,7 +229,8 @@ def upload_html_to_s3():
                     local_file, 
                     bucket, 
                     s3_key, 
-                    'text/html'
+                    'text/html',
+                    inline=True
                 )
                 
                 if success:
@@ -137,7 +241,9 @@ def upload_html_to_s3():
         # Télécharger les images spécifiques
         specific_images = [
             ('debian.png', 'image/png'),
-            ('logo-cloudtemple-footer.svg', 'image/svg+xml')
+            ('ubuntu.png', 'image/png'),
+            ('cloudtemple.svg', 'image/svg+xml'),
+            ('default-os.png', 'image/png')
         ]
         
         for filename, content_type in specific_images:
@@ -150,7 +256,8 @@ def upload_html_to_s3():
                     local_file,
                     bucket,
                     s3_key,
-                    content_type
+                    content_type,
+                    inline=True
                 )
                 
                 if success:
@@ -161,6 +268,11 @@ def upload_html_to_s3():
                 print(f"{datetime.datetime.now()} - Image spécifique non trouvée: {local_file}")
     else:
         print(f"{datetime.datetime.now()} - Répertoire d'images par défaut non trouvé: {images_dir}")
+    
+    # Supprimer le fichier global_summary.json local
+    if os.path.exists(global_summary_file):
+        os.remove(global_summary_file)
+        print(f"{datetime.datetime.now()} - Fichier global_summary.json local supprimé")
     
     print(f"{datetime.datetime.now()} - Script terminé avec succès")
     return public_url
