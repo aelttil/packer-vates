@@ -83,24 +83,23 @@ source "xenserver-iso" "opnsense" {
 
   # Ces commandes de démarrage sont spécifiques à OPNsense et devront être ajustées
   boot_command = [
-
-        "<wait1m30s>",
-        "installer<enter>",
-        "opnsense<enter><wait>",
-        "<enter><wait2s>",
-        "<down><enter><wait2s>",
-        "<down><enter><wait2s>",
-        "<left><enter><wait2s>",
-        "<wait5m>",
-        "<down><enter><wait>",
-        "<wait1m30s>",
-        "root<enter>",
-        "opnsense<enter><wait>",
-        "8<enter><wait2s>",
-        "dhclient vtnet0<enter><wait5s>",
-        "telnet {{ .HTTPIP }} {{ .HTTPPort }} | sed '1,/^$/d' >/conf/config.xml<wait><enter>",
-        "GET /config.xml HTTP/1.0<enter><enter>",
-        "reboot<enter>"
+        # "<wait1m30s>",
+        # "installer<enter>",
+        # "opnsense<enter><wait>",
+        # "<enter><wait2s>",
+        # "<down><enter><wait2s>",
+        # "<down><enter><wait2s>",
+        # "<left><enter><wait2s>",
+        # "<wait5m>",
+        # "<down><enter><wait>",
+        # "<wait1m30s>",
+        # "root<enter>",
+        # "opnsense<enter><wait>",
+        # "8<enter><wait2s>",
+        # "dhclient vtnet0<enter><wait5s>",
+        # "telnet {{ .HTTPIP }} {{ .HTTPPort }} | sed '1,/^$/d' >/conf/config.xml<wait><enter>",
+        # "GET /config.xml HTTP/1.0<enter><enter>",
+        # "reboot<enter>"
   ]
 
   clone_template = "Generic Linux BIOS"
