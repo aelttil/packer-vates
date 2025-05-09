@@ -67,7 +67,7 @@ variable "network_names" {
 }
 
 source "xenserver-iso" "opnsense" {
-  iso_checksum      = "68efe0e5c20bd5fbe42918f000685ec10a1756126e37ca28f187b2ad7e5889ca"
+  iso_checksum      = "e4c178840ab1017bf80097424da76d896ef4183fe10696e92f288d0641475871"
   iso_url           = "https://reks2ee2b1.s3.fr1.cloud-temple.com/packer-vates/ISO/OPNsense-25.1-dvd-amd64.iso"
 
   sr_iso_name    = var.sr_iso_name
