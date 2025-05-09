@@ -8,6 +8,7 @@ on:
       - 'upload_html_to_s3.py'
       - 'generate_global_metadata.py'
       - '.github/workflows/publish-metadata.yml'
+      - 'packer/**'
   pull_request:
     branches: [ main ]
     paths:
