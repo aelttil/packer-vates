@@ -126,7 +126,7 @@ source "xenserver-iso" "ubuntu24" {
   pause_before_connecting = "60s"
 
   # Conserver la VM en cas d'échec pour faciliter le débogage
-  keep_vm          = "always"
+  keep_vm          = "never"
   format = "xva_compressed"
 }
 
