@@ -143,9 +143,54 @@ jobs:
         run: |
           python3 process_template.py packer/ubuntu/ubuntu24.pkr.hcl credentials.pkrvars.hcl
 
+  # Job pour builder OPNsense
+  build-opnsense:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        run: |
+          # Checkout code manually if the action fails
+          if [ -d ".git" ]; then
+            git pull
+          else
+            git clone "${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}" .
+            git checkout "${GITHUB_REF#refs/heads/}"
+          fi
+
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements.txt
+
+      - name: Create credentials file
+        run: |
+          cat > credentials.pkrvars.hcl << EOF
+          remote_host = "${{ secrets.REMOTE_HOST }}"
+          remote_username = "root"
+          remote_password = "${{ secrets.REMOTE_PASSWORD }}"
+          sr_iso_name = "ISO"
+          sr_name = "${{ secrets.SR_NAME }}"
+          network_names = ["${{ secrets.NETWORK_NAME }}"]
+          EOF
+
+      - name: Initialize Packer
+        run: |
+          cd packer/opnsense
+          packer init opnsense.pkr.hcl
+          cd ../..
+
+      - name: Process template
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          S3_ENDPOINT_URL: ${{ secrets.S3_ENDPOINT_URL }}
+        run: |
+          python3 process_template.py packer/opnsense/opnsense.pkr.hcl credentials.pkrvars.hcl
+
   # Job pour générer les métadonnées globales
   generate-metadata:
-    needs: [build-debian12, build-ubuntu22, build-ubuntu24]
+    needs: [build-debian12, build-ubuntu22, build-ubuntu24, build-opnsense]
     runs-on: self-hosted
     steps:
       - name: Checkout code
