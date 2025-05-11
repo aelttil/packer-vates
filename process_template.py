@@ -30,7 +30,7 @@ def run_packer(template_file, var_file, log_file):
     
     # Créer une copie de l'environnement actuel et ajouter PACKER_LOG=1
     env = os.environ.copy()
-    # env["PACKER_LOG"] = "1"
+    env["PACKER_LOG"] = "1"
     
     with open(log_file, 'w') as f:
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env)

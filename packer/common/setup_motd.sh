@@ -104,7 +104,9 @@ build_date="BUILD_DATE_PLACEHOLDER"
 printf "${LIGHT_BLUE}${BOLD}"
 printf "  === CLOUD TEMPLE ===\n"
 printf "${NONE}"
-printf "${LIGHT_YELLOW}  Welcome to your Linux server 🚀${NONE}\n\n"
+# Utiliser une variable pour le texte avec emoji pour éviter les problèmes d'échappement
+welcome_text="Welcome to your Linux server 🚀"
+printf "${LIGHT_YELLOW}  %s${NONE}\n\n" "$welcome_text"
 
 # Affichage des informations système
 printf "${LIGHT_CYAN}  System Information:${NONE}\n"
@@ -120,21 +122,30 @@ printf "${LIGHT_GREEN}  ▸ Build Date  :${NONE} $build_date\n"
 printf "\n${LIGHT_CYAN}  Hardware Information:${NONE}\n"
 printf "${LIGHT_GREEN}  ▸ Processor   :${NONE} $proc ($coeurs cores)\n"
 printf "${LIGHT_GREEN}  ▸ CPU Load    :${NONE} $one (1min) / $five (5min) / $fifteen (15min)\n"
-printf "${LIGHT_GREEN}  ▸ Memory      :${NONE} $(($memfree/1024)) MB free ($pourcentfree%%) / $(($memtotal/1024)) MB total\n"
+# Stocker le texte formaté dans une variable pour éviter les problèmes d'échappement
+mem_text="$(($memfree/1024)) MB free ($pourcentfree%) / $(($memtotal/1024)) MB total"
+printf "${LIGHT_GREEN}  ▸ Memory      :${NONE} %s\n" "$mem_text"
 printf "${LIGHT_GREEN}  ▸ Swap        :${NONE} $swaptotal\n"
 
 # Affichage des informations système
 printf "\n${LIGHT_CYAN}  Usage Information:${NONE}\n"
 printf "${LIGHT_GREEN}  ▸ Processes   :${NONE} $process\n"
 printf "${LIGHT_GREEN}  ▸ Users logged :${NONE} $connecteduser\n"
-printf "${LIGHT_GREEN}  ▸ Disk Usage  :${NONE} $diskused\n"
-printf "${LIGHT_GREEN}  ▸ Inodes Used :${NONE} $inodeused\n"
+# Stocker le texte formaté dans une variable pour éviter les problèmes d'échappement
+disk_text="$diskused"
+printf "${LIGHT_GREEN}  ▸ Disk Usage  :${NONE} %s\n" "$disk_text"
+# Stocker le texte formaté dans une variable pour éviter les problèmes d'échappement
+inode_text="$inodeused"
+printf "${LIGHT_GREEN}  ▸ Inodes Used :${NONE} %s\n" "$inode_text"
 printf "${LIGHT_GREEN}  ▸ IP Address  :${LIGHT_RED} $addrip${NONE}\n"
 printf "${LIGHT_GREEN}  ▸ Uptime      :${NONE} $uptime\n"
 
 # Affichage du footer
-printf "\n${LIGHT_BLUE}  ▸ Deployed with ♥ by Cloud Temple – Innovation by Design${NONE}\n"
-printf "${LIGHT_BLUE}  ▸ Generated from a Cloud Temple automated template${NONE}\n\n"
+# Utiliser des variables pour le texte avec caractères spéciaux pour éviter les problèmes d'échappement
+footer_text1="Deployed with ♥ by Cloud Temple – Innovation by Design"
+footer_text2="Generated from a Cloud Temple automated template"
+printf "\n${LIGHT_BLUE}  ▸ %s${NONE}\n" "$footer_text1"
+printf "${LIGHT_BLUE}  ▸ %s${NONE}\n\n" "$footer_text2"
 EOF
 chmod +x /etc/update-motd.d/10-cloud-temple
 

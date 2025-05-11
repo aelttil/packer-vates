@@ -155,6 +155,11 @@ build {
       # Scripts spécifiques à Debian
       "sudo /tmp/install_xen_tools.sh",
       "sudo /tmp/debian_specific.sh",
+      
+      # Activation de cloud-init
+      "sudo /tmp/enable_cloud_init.sh",
+      
+      # Nettoyage
       "sudo /tmp/cleanup.sh",
       
       # Suppression des scripts

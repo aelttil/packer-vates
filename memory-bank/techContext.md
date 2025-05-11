@@ -11,6 +11,9 @@ Ce document décrit le contexte technique du projet d'automatisation de template
 - **Version**: Dernière version stable recommandée
 - **Plugins**: Plugin XenServer/XCP-ng requis
 - **Configuration**: Fichiers HCL (HashiCorp Configuration Language)
+- **Particularités**: 
+  - Les templates Ubuntu 22.04 et 24.04 ont cloud-init installé mais désactivé par défaut
+  - Un script d'activation de cloud-init a été ajouté au processus de build
 
 ### XCP-ng/XenServer
 
@@ -73,9 +76,21 @@ pyhcl2==0.3.5
 │   │   ├── harden_ssh.sh
 │   │   ├── harden_system.sh
 │   │   └── update_system.sh
+│   ├── ubuntu/          # Templates spécifiques à Ubuntu
+│   │   ├── ubuntu22.pkr.hcl
+│   │   ├── ubuntu24.pkr.hcl
+│   │   ├── extras/
+│   │   │   ├── ubuntu_specific.sh
+│   │   │   └── enable_cloud_init.sh  # Script d'activation de cloud-init
+│   │   ├── http/
+│   │   │   ├── meta-data
+│   │   │   └── user-data
+│   │   └── http-ubuntu22/
+│   │       ├── meta-data
+│   │       └── user-data
 │   └── debian/          # Templates spécifiques à Debian
 │       ├── debian12.pkr.hcl
-│       ├── common/
+│       ├── extras/
 │       │   ├── debian_specific.sh
 │       │   └── install_xen_tools.sh
 │       └── http/
@@ -123,3 +138,13 @@ pyhcl2==0.3.5
 - **Stockage**: 10GB minimum
 - **Réseau**: Accès au serveur XCP-ng et au stockage S3
 - **Logiciels**: Python 3.6+, Packer, Git
+
+## Problèmes connus et solutions
+
+### Cloud-Init désactivé par défaut
+
+Les templates Ubuntu 22.04 et 24.04 ont cloud-init installé mais désactivé par défaut. Un script d'activation a été ajouté au processus de build pour résoudre ce problème. Voir le document `memory-bank/cloud-init-templates.md` pour plus de détails.
+
+### Nommage des interfaces réseau
+
+Les interfaces réseau dans les templates Ubuntu sont nommées `enX0`. Cette convention de nommage doit être respectée dans les configurations cloud-init pour que la configuration réseau fonctionne correctement.

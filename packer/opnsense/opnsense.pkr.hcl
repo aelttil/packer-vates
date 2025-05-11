@@ -79,27 +79,25 @@ source "xenserver-iso" "opnsense" {
   remote_username = var.remote_username
 
   http_directory = "packer/opnsense/http"
-  boot_wait      = "35s"
+  boot_wait      = "90s"
 
   # Ces commandes de démarrage sont spécifiques à OPNsense et devront être ajustées
+  
   boot_command = [
-        # "<wait1m30s>",
-        # "installer<enter>",
-        # "opnsense<enter><wait>",
-        # "<enter><wait2s>",
-        # "<down><enter><wait2s>",
-        # "<down><enter><wait2s>",
-        # "<left><enter><wait2s>",
-        # "<wait5m>",
-        # "<down><enter><wait>",
-        # "<wait1m30s>",
-        # "root<enter>",
-        # "opnsense<enter><wait>",
-        # "8<enter><wait2s>",
-        # "dhclient vtnet0<enter><wait5s>",
-        # "telnet {{ .HTTPIP }} {{ .HTTPPort }} | sed '1,/^$/d' >/conf/config.xml<wait><enter>",
-        # "GET /config.xml HTTP/1.0<enter><enter>",
-        # "reboot<enter>"
+    "installer<enter><wait>opnsense<enter><wait><wait><wait>",
+    "<wait><wait><wait><wait><wait><wait><wait><wait><wait><wait>",
+    "<enter><enter><enter>",
+    "<down><wait><enter><wait><wait><wait><wait>",
+    "<enter><wait><wait><wait><wait>",
+    "<left><wait><enter><wait>",
+    "<wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait>",
+    "<wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait>",
+    "<wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait>",
+    "<wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait>",
+    "<wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait>",
+    "<wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait>",
+    "<wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait><wait>",
+    "<down><wait><enter>"
   ]
 
   clone_template = "Generic Linux BIOS"
@@ -123,7 +121,7 @@ source "xenserver-iso" "opnsense" {
   pause_before_connecting = "60s"
 
   # Conserver la VM en cas d'échec pour faciliter le débogage
-  keep_vm          = "always" #TODO never
+  keep_vm          = "never" #TODO never
   format = "xva_compressed"
 }
 
