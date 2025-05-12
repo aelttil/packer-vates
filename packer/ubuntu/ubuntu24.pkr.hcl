@@ -114,9 +114,6 @@ source "xenserver-iso" "ubuntu24" {
   ssh_username            = "admct"
   ssh_password            = "InitCT@2025"
 
-  # ssh_host                = "10.0.0.144"
-  # ssh_port                = 22
-
   ssh_wait_timeout        = "60000s"
   ssh_handshake_attempts  = 10000
 
@@ -154,8 +151,8 @@ build {
       "sudo /tmp/harden_system.sh",
       "sudo /tmp/setup_motd.sh",
       
-      # Activation de cloud-init
-      "sudo /tmp/enable_cloud_init.sh",
+      # Scripts spécifiques à Ubuntu (incluant l'activation de cloud-init)
+      "sudo /tmp/ubuntu_specific.sh",
 
       # Suppression des scripts
       "rm -f /tmp/*.sh"
