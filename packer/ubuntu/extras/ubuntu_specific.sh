@@ -22,7 +22,6 @@ add-apt-repository multiverse -y
 # Mise à jour après l'ajout des dépôts
 apt-get update
 
-
 sudo rm -f /etc/cloud/cloud.cfg.d/99-installer.cfg
 sudo sed -i 's/lock_passwd: True/lock_passwd: False/g' /etc/cloud/cloud.cfg
 sudo rm -f /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg

@@ -142,9 +142,6 @@ build {
       
       # Scripts spécifiques à Ubuntu
       "sudo /tmp/ubuntu_specific.sh",
-      
-      # Activation de cloud-init
-      "sudo /tmp/enable_cloud_init.sh",
 
       # Suppression des scripts
       "rm -f /tmp/*.sh"
