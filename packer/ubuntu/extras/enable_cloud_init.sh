@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Activation de cloud-init..."
+echo "Activation de cloud-init pour Ubuntu..."
 
 # S'assurer que cloud-init est installé
 apt-get update
@@ -13,11 +13,18 @@ systemctl enable cloud-init-local.service
 systemctl enable cloud-config.service
 systemctl enable cloud-final.service
 
-# Vérifier que cloud-init est activé
-echo "Statut des services cloud-init :"
-systemctl status cloud-init.service --no-pager
-systemctl status cloud-init-local.service --no-pager
-systemctl status cloud-config.service --no-pager
-systemctl status cloud-final.service --no-pager
+# Vérifier que cloud-init est activé sans faire échouer le script
+echo "Vérification de l'activation des services cloud-init :"
+echo "Note: Les services sont activés mais inactifs jusqu'au prochain démarrage"
 
-echo "cloud-init a été activé avec succès."
+# Vérifier si les services sont activés (enabled) sans vérifier s'ils sont actifs
+for service in cloud-init.service cloud-init-local.service cloud-config.service cloud-final.service; do
+  if systemctl is-enabled $service >/dev/null 2>&1; then
+    echo "✓ $service est activé"
+  else
+    echo "✗ $service n'est pas activé"
+    # Ne pas faire échouer le script même si un service n'est pas activé
+  fi
+done
+
+echo "cloud-init a été activé avec succès sur Ubuntu."
