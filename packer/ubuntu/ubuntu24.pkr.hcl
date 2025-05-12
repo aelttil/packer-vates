@@ -125,6 +125,8 @@ source "xenserver-iso" "ubuntu24" {
   # Conserver la VM en cas d'échec pour faciliter le débogage
   keep_vm          = "never"
   format = "xva_compressed"
+  skip_set_template = true
+
 }
 
 build {
