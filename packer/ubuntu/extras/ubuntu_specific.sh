@@ -22,4 +22,15 @@ add-apt-repository multiverse -y
 # Mise à jour après l'ajout des dépôts
 apt-get update
 
+
+sudo rm -f /etc/cloud/cloud.cfg.d/99-installer.cfg
+sudo sed -i 's/lock_passwd: True/lock_passwd: False/g' /etc/cloud/cloud.cfg
+sudo rm -f /etc/cloud/cloud.cfg.d/subiquity-disable-cloudinit-networking.cfg
+sudo bash -c "echo 'disable_vmware_customization: false' >> /etc/cloud/cloud.cfg"
+sudo bash -c "echo 'datasource_list: [ NoCloud, VMware, OVF, None ]' > /etc/cloud/cloud.cfg.d/90_dpkg.cfg"
+sudo sed -i 's|nocloud-net;seedfrom=http://.*/||' /etc/default/grub
+sudo sed -i 's/autoinstall//g' /etc/default/grub
+sudo update-grub
+sudo cloud-init clean --logs
+
 echo "Configurations spécifiques à Ubuntu terminées."
