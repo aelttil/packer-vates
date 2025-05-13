@@ -114,6 +114,9 @@ source "xenserver-iso" "ubuntu22" {
   # Conserver la VM en cas d'échec pour faciliter le débogage
   keep_vm          = "never"
   format = "xva_compressed"
+
+  # Permet de faire un XVA de type VM ou Template
+  skip_set_template = true
 }
 
 build {
