@@ -425,31 +425,31 @@
             const contentElement = document.getElementById('content');
             let html = '<div class="product-grid">';
             
-            // Loop through the list of operating systems
-            data.operating_systems.forEach(osData => {
-                // Get only the latest version
-                const template = osData.latest;
-                
-                html += `
-                    <div class="product-card">
-                        <a href="detail.html?os=${osData.os}" class="product-link">
-                            <img src="${osData.os === 'debian' ? 'images/debian.png' : osData.os === 'ubuntu' ? 'images/ubuntu.png' : 'images/default-os.png'}" 
-                                 alt="${osData.os} Logo" class="product-logo">
-                            <div class="product-category">Operating System</div>
-                            <h3 class="product-name">${template.name}</h3>
-                            <div class="product-description">${template.description}</div>
-                        </a>
-                        <div class="product-owner">
-                            <span class="product-owner-label">Published by:</span>
-                            <span class="product-owner-name">${template.publisher}</span>
+                // Loop through the list of operating systems
+                data.operating_systems.forEach(osData => {
+                    // Get only the latest version
+                    const template = osData.latest;
+                    
+                    html += `
+                        <div class="product-card">
+                            <a href="detail.html?name=${encodeURIComponent(template.name)}" class="product-link">
+                                <img src="${osData.os === 'debian' ? 'images/debian.png' : osData.os === 'ubuntu' ? 'images/ubuntu.png' : 'images/default-os.png'}" 
+                                     alt="${osData.os} Logo" class="product-logo">
+                                <div class="product-category">Operating System</div>
+                                <h3 class="product-name">${template.name}</h3>
+                                <div class="product-description">${template.description}</div>
+                            </a>
+                            <div class="product-owner">
+                                <span class="product-owner-label">Published by:</span>
+                                <span class="product-owner-name">${template.publisher}</span>
+                            </div>
+                            <div class="product-actions">
+                                <a href="${template.files[0]}" class="product-action-button download-button">Download</a>
+                                <a href="detail.html?name=${encodeURIComponent(template.name)}" class="product-action-button info-button">Details</a>
+                            </div>
                         </div>
-                        <div class="product-actions">
-                            <a href="${template.files[0]}" class="product-action-button download-button">Download</a>
-                            <a href="detail.html?os=${osData.os}" class="product-action-button info-button">Details</a>
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
             html += '</div>';
             contentElement.innerHTML = html;
             

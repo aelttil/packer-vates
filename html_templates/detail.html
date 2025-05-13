@@ -400,12 +400,12 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Get OS parameter from URL
+            // Get template name parameter from URL
             const urlParams = new URLSearchParams(window.location.search);
-            const os = urlParams.get('os');
+            const templateName = urlParams.get('name');
             
-            if (!os) {
-                document.getElementById('template-details').innerHTML = '<div class="error">Error: Operating system not specified</div>';
+            if (!templateName) {
+                document.getElementById('template-details').innerHTML = '<div class="error">Error: Template name not specified</div>';
                 return;
             }
             
@@ -418,7 +418,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    displayTemplateDetails(data, os);
+                    displayTemplateDetails(data, templateName);
                 })
                 .catch(error => {
                     document.getElementById('template-details').innerHTML = `
@@ -429,31 +429,53 @@
                 });
         });
         
-        function displayTemplateDetails(data, os) {
-            // Find data for the specified operating system
-            const osData = data.operating_systems.find(item => item.os === os);
+        function displayTemplateDetails(data, templateName) {
+            // Find template with the specified name
+            let foundTemplate = null;
+            let foundOsData = null;
             
-            if (!osData) {
+            // Search through all operating systems
+            for (const osData of data.operating_systems) {
+                // Check latest template
+                if (osData.latest && osData.latest.name === templateName) {
+                    foundTemplate = osData.latest;
+                    foundOsData = osData;
+                    break;
+                }
+                
+                // Check history templates
+                if (osData.history) {
+                    for (const historyTemplate of osData.history) {
+                        if (historyTemplate.name === templateName) {
+                            foundTemplate = historyTemplate;
+                            foundOsData = osData;
+                            break;
+                        }
+                    }
+                    if (foundTemplate) break;
+                }
+            }
+            
+            if (!foundTemplate || !foundOsData) {
                 document.getElementById('template-details').innerHTML = `
                     <div class="error">
-                        <p>Error: Operating system "${os}" not found</p>
+                        <p>Error: Template "${templateName}" not found</p>
                     </div>
                 `;
                 return;
             }
             
-            // Display latest template details
-            displayLatestTemplate(osData);
+            // Display template details
+            displayLatestTemplate(foundOsData, foundTemplate);
             
             // Display template history
-            displayTemplateHistory(osData);
+            displayTemplateHistory(foundOsData);
             
             // Display associated files
-            displayTemplateFiles(osData);
+            displayTemplateFiles(foundOsData, foundTemplate);
         }
         
-        function displayLatestTemplate(osData) {
-            const template = osData.latest;
+        function displayLatestTemplate(osData, template) {
             const detailsElement = document.getElementById('template-details');
             
             // Extract base timestamp from XVA file
@@ -528,9 +550,8 @@
             historyElement.innerHTML = html;
         }
         
-        function displayTemplateFiles(osData) {
+        function displayTemplateFiles(osData, template) {
             const filesElement = document.getElementById('template-files');
-            const template = osData.latest;
             const xvaFile = template.files[0];
             const baseFilename = xvaFile.split('/').pop().replace('.xva', '');
             
