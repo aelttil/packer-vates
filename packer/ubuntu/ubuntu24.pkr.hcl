@@ -27,7 +27,7 @@ variable "publisher" {
 
 variable "target_platform" {
   type        = string
-  description = "Produit cible pour le template. Exemple OpenIaaS ou IaaS VMware"
+  description = "Produit cible pour le template. Exemple OpenIaaS ou IaaS VMware."
   default     = "openiaas"
 }
 variable "remote_host" {
