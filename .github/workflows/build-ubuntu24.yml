@@ -9,7 +9,7 @@ on:
       - '.github/workflows/build-ubuntu24.yml'
   pull_request:
     branches: [ main ]
-  # Permettre le déclenchement manuel
+  # Permettre le déclenchement manuel.
   workflow_dispatch:
 
 jobs:
